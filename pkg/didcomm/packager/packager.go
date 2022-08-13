@@ -130,13 +130,7 @@ func (bp *Packager) prepareSenderAndRecipientKeys(cty string, envelope *transpor
 
 	for i, receiverKeyID := range envelope.ToKeys {
 		switch {
-		case strings.HasPrefix(receiverKeyID, "did:key"):
-			marshalledKey, err := addDIDKeyToRecipients(i, receiverKeyID, isLegacy)
-			if err != nil {
-				return nil, nil, err
-			}
 
-			recipients = append(recipients, marshalledKey)
 		case strings.Index(receiverKeyID, "#") > 0:
 			receiverKey, err := bp.resolveKeyAgreementFromDIDDoc(receiverKeyID)
 			if err != nil {
@@ -154,6 +148,14 @@ func (bp *Packager) prepareSenderAndRecipientKeys(cty string, envelope *transpor
 				recipients = append(recipients, marshalledKey)
 			}
 
+		case strings.HasPrefix(receiverKeyID, "did:key"):
+			marshalledKey, err := addDIDKeyToRecipients(i, receiverKeyID, isLegacy)
+			if err != nil {
+				return nil, nil, err
+			}
+
+			recipients = append(recipients, marshalledKey)
+
 		default:
 			recipients = append(recipients, []byte(receiverKeyID))
 		}
@@ -162,18 +164,7 @@ func (bp *Packager) prepareSenderAndRecipientKeys(cty string, envelope *transpor
 	var senderKID []byte
 
 	switch {
-	case strings.HasPrefix(string(envelope.FromKey), "did:key"):
-		senderKey, err := kmsdidkey.EncryptionPubKeyFromDIDKey(string(envelope.FromKey))
-		if err != nil {
-			return nil, nil, fmt.Errorf("prepareSenderAndRecipientKeys: failed to extract pubKeyBytes from "+
-				"senderVerKey: %w", err)
-		}
 
-		if isLegacy {
-			senderKID = senderKey.X // for legacy, use the sender raw key (Ed25519 key)
-		} else {
-			senderKID = buildSenderKID(senderKey, envelope)
-		}
 	//nolint:gocritic // need to check with strings not bytes
 	case strings.Index(string(envelope.FromKey), "#") > 0:
 		senderKey, err := bp.resolveKeyAgreementFromDIDDoc(string(envelope.FromKey))
@@ -198,6 +189,20 @@ func (bp *Packager) prepareSenderAndRecipientKeys(cty string, envelope *transpor
 
 			senderKID = buildSenderKID(senderKey, envelope)
 		}
+
+	case strings.HasPrefix(string(envelope.FromKey), "did:key"):
+		senderKey, err := kmsdidkey.EncryptionPubKeyFromDIDKey(string(envelope.FromKey))
+		if err != nil {
+			return nil, nil, fmt.Errorf("prepareSenderAndRecipientKeys: failed to extract pubKeyBytes from "+
+				"senderVerKey: %w", err)
+		}
+
+		if isLegacy {
+			senderKID = senderKey.X // for legacy, use the sender raw key (Ed25519 key)
+		} else {
+			senderKID = buildSenderKID(senderKey, envelope)
+		}
+
 	default:
 		senderKID = envelope.FromKey
 	}
