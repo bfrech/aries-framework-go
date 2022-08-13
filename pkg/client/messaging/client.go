@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/hyperledger/aries-framework-go/pkg/doc/util/kmsdidkey"
 
 	"github.com/google/uuid"
 
@@ -20,7 +21,6 @@ import (
 	"github.com/hyperledger/aries-framework-go/pkg/framework/aries/api/vdr"
 	"github.com/hyperledger/aries-framework-go/pkg/kms"
 	"github.com/hyperledger/aries-framework-go/pkg/store/connection"
-	"github.com/hyperledger/aries-framework-go/pkg/vdr/fingerprint"
 	"github.com/hyperledger/aries-framework-go/spi/storage"
 )
 
@@ -246,12 +246,13 @@ func (c *Client) sendToTheirDID(msg service.DIDCommMsgMap, theirDID string) (mes
 }
 
 func (c *Client) sendToDestination(msg service.DIDCommMsgMap, dest *service.Destination) (messageDispatcher, error) {
-	_, sigPubKey, err := c.ctx.KMS().CreateAndExportPubKeyBytes(kms.ED25519Type)
+
+	_, sigPubKey, err := c.ctx.KMS().CreateAndExportPubKeyBytes(kms.X25519ECDHKWType)
 	if err != nil {
 		return nil, err
 	}
 
-	didKey, _ := fingerprint.CreateDIDKey(sigPubKey)
+	didKey, _ := kmsdidkey.BuildDIDKeyByKeyType(sigPubKey, kms.X25519ECDHKWType)
 
 	return func() error {
 		return c.ctx.Messenger().SendToDestination(msg, didKey, dest)
