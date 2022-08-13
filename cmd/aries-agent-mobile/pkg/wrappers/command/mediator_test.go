@@ -11,7 +11,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wrappers/models"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/command/mediator"
 )
 
@@ -45,8 +44,8 @@ func TestMediator_BatchPickup(t *testing.T) {
 
 		payload := sampleBatchPickupRequest
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := mediatorController.BatchPickup(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := mediatorController.BatchPickup([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -65,8 +64,8 @@ func TestMediator_Connections(t *testing.T) {
 
 		payload := emptyJSON
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := mediatorController.Connections(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := mediatorController.Connections([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -85,8 +84,8 @@ func TestMediator_Reconnect(t *testing.T) {
 
 		payload := sampleConnRequest
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := mediatorController.Reconnect(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := mediatorController.Reconnect([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -103,8 +102,8 @@ func TestMediator_ReconnectAll(t *testing.T) {
 		fakeHandler := mockCommandRunner{data: []byte(mockResponse)}
 		mediatorController.handlers[mediator.ReconnectCommandMethod] = fakeHandler.exec
 
-		req := &models.RequestEnvelope{Payload: []byte("")}
-		resp := mediatorController.ReconnectAll(req)
+		//req := &models.RequestEnvelope{Payload: []byte("")}
+		resp := mediatorController.ReconnectAll([]byte(""))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Contains(t, string(resp.Payload), mockResponse)
@@ -121,8 +120,8 @@ func TestMediator_Register(t *testing.T) {
 
 		payload := sampleConnRequest
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := mediatorController.Register(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := mediatorController.Register([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -142,8 +141,8 @@ func TestMediator_Status(t *testing.T) {
 
 		payload := sampleConnRequest
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := mediatorController.Status(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := mediatorController.Status([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -162,8 +161,8 @@ func TestMediator_Unregister(t *testing.T) {
 
 		payload := emptyJSON
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := mediatorController.Unregister(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := mediatorController.Unregister([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,

@@ -12,7 +12,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wrappers/models"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/mediator"
 )
 
@@ -48,8 +47,8 @@ func TestMediator_BatchPickup(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + mediator.BatchPickupPath,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.BatchPickup(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.BatchPickup([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -69,8 +68,8 @@ func TestMediator_Connections(t *testing.T) {
 			method: http.MethodGet, url: mockAgentURL + mediator.GetConnectionsPath,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.Connections(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.Connections([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -90,8 +89,8 @@ func TestMediator_Reconnect(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + mediator.ReconnectPath,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.Reconnect(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.Reconnect([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -109,8 +108,8 @@ func TestMediator_ReconnectAll(t *testing.T) {
 			method: http.MethodGet, url: mockAgentURL + mediator.ReconnectAllPath,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte("")}
-		resp := controller.ReconnectAll(req)
+		//req := &models.RequestEnvelope{Payload: []byte("")}
+		resp := controller.ReconnectAll([]byte(""))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -130,8 +129,8 @@ func TestMediator_Register(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + mediator.RegisterPath,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.Register(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.Register([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -152,8 +151,8 @@ func TestMediator_Status(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + mediator.StatusPath,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.Status(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.Status([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -173,8 +172,8 @@ func TestMediator_Unregister(t *testing.T) {
 			method: http.MethodDelete, url: mockAgentURL + mediator.UnregisterPath,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.Unregister(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.Unregister([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)

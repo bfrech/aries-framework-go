@@ -11,7 +11,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wrappers/models"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/command/outofband"
 )
 
@@ -48,8 +47,8 @@ func TestOutOfBand_AcceptInvitation(t *testing.T) {
 
 		payload := `{"invitation":{},"my_label":"label"}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := controller.AcceptInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := controller.AcceptInvitation([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -68,8 +67,8 @@ func TestOutOfBand_ActionContinue(t *testing.T) {
 
 		payload := jsonPayload
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := controller.ActionContinue(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := controller.ActionContinue([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -88,8 +87,8 @@ func TestOutOfBand_ActionStop(t *testing.T) {
 
 		payload := jsonPayload
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := controller.ActionStop(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := controller.ActionStop([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -108,8 +107,8 @@ func TestOutOfBand_Actions(t *testing.T) {
 
 		payload := emptyJSON
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := controller.Actions(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := controller.Actions([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -131,8 +130,8 @@ func TestOutOfBand_CreateInvitation(t *testing.T) {
 
 		payload := `{"label":"label","goal":"goal","goal_code":"goal_code","service":["s1"],"protocols":["s1"]}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := controller.CreateInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := controller.CreateInvitation([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,

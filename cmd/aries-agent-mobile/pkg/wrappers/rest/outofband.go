@@ -21,28 +21,33 @@ type OutOfBand struct {
 }
 
 // CreateInvitation creates and saves an out-of-band invitation.
-func (oob *OutOfBand) CreateInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return oob.createRespEnvelope(request, outofband.CreateInvitation)
+func (oob *OutOfBand) CreateInvitation(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return oob.createRespEnvelope(req, outofband.CreateInvitation)
 }
 
 // AcceptInvitation from another agent and return the ID of the new connection records.
-func (oob *OutOfBand) AcceptInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return oob.createRespEnvelope(request, outofband.AcceptInvitation)
+func (oob *OutOfBand) AcceptInvitation(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return oob.createRespEnvelope(req, outofband.AcceptInvitation)
 }
 
 // Actions returns pending actions that have not yet to be executed or canceled.
-func (oob *OutOfBand) Actions(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return oob.createRespEnvelope(request, outofband.Actions)
+func (oob *OutOfBand) Actions(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return oob.createRespEnvelope(req, outofband.Actions)
 }
 
 // ActionContinue allows continuing with the protocol after an action event was triggered.
-func (oob *OutOfBand) ActionContinue(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return oob.createRespEnvelope(request, outofband.ActionContinue)
+func (oob *OutOfBand) ActionContinue(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return oob.createRespEnvelope(req, outofband.ActionContinue)
 }
 
 // ActionStop stops the protocol after an action event was triggered.
-func (oob *OutOfBand) ActionStop(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return oob.createRespEnvelope(request, outofband.ActionStop)
+func (oob *OutOfBand) ActionStop(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return oob.createRespEnvelope(req, outofband.ActionStop)
 }
 
 func (oob *OutOfBand) createRespEnvelope(request *models.RequestEnvelope, endpoint string) *models.ResponseEnvelope {

@@ -20,10 +20,10 @@ type KMS struct {
 }
 
 // CreateKeySet create a new public/private encryption and signature key pairs set.
-func (k *KMS) CreateKeySet(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (k *KMS) CreateKeySet(request []byte) *models.ResponseEnvelope {
 	args := kms.CreateKeySetRequest{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -36,8 +36,8 @@ func (k *KMS) CreateKeySet(request *models.RequestEnvelope) *models.ResponseEnve
 }
 
 // ImportKey imports a key.
-func (k *KMS) ImportKey(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	response, cmdErr := exec(k.handlers[kms.ImportKeyCommandMethod], request.Payload)
+func (k *KMS) ImportKey(request []byte) *models.ResponseEnvelope {
+	response, cmdErr := exec(k.handlers[kms.ImportKeyCommandMethod], request)
 	if cmdErr != nil {
 		return &models.ResponseEnvelope{Error: cmdErr}
 	}

@@ -21,28 +21,33 @@ type VDR struct {
 }
 
 // ResolveDID resolve did.
-func (v *VDR) ResolveDID(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return v.createRespEnvelope(request, cmdvdr.ResolveDIDCommandMethod)
+func (v *VDR) ResolveDID(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return v.createRespEnvelope(req, cmdvdr.ResolveDIDCommandMethod)
 }
 
 // SaveDID saves the did doc to the store.
-func (v *VDR) SaveDID(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return v.createRespEnvelope(request, cmdvdr.SaveDIDCommandMethod)
+func (v *VDR) SaveDID(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return v.createRespEnvelope(req, cmdvdr.SaveDIDCommandMethod)
 }
 
 // CreateDID create the did doc.
-func (v *VDR) CreateDID(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return v.createRespEnvelope(request, cmdvdr.CreateDIDCommandMethod)
+func (v *VDR) CreateDID(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return v.createRespEnvelope(req, cmdvdr.CreateDIDCommandMethod)
 }
 
 // GetDID retrieves the did from the store.
-func (v *VDR) GetDID(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return v.createRespEnvelope(request, cmdvdr.GetDIDCommandMethod)
+func (v *VDR) GetDID(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return v.createRespEnvelope(req, cmdvdr.GetDIDCommandMethod)
 }
 
 // GetDIDRecords retrieves the did doc containing name and didID.
-func (v *VDR) GetDIDRecords(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return v.createRespEnvelope(request, cmdvdr.GetDIDsCommandMethod)
+func (v *VDR) GetDIDRecords(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return v.createRespEnvelope(req, cmdvdr.GetDIDsCommandMethod)
 }
 
 func (v *VDR) createRespEnvelope(request *models.RequestEnvelope, endpoint string) *models.ResponseEnvelope {

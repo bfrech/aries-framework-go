@@ -13,7 +13,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wrappers/models"
 	cmdvdr "github.com/hyperledger/aries-framework-go/pkg/controller/command/vdr"
 	opvdr "github.com/hyperledger/aries-framework-go/pkg/controller/rest/vdr"
 )
@@ -57,8 +56,8 @@ func TestVDR_GetDID(t *testing.T) {
 			method: http.MethodGet, url: mockURL,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := vdrController.GetDID(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := vdrController.GetDID([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -78,8 +77,8 @@ func TestVDR_GetDIDRecords(t *testing.T) {
 			method: http.MethodGet, url: mockAgentURL + opvdr.GetDIDRecordsPath,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := vdrController.GetDIDRecords(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := vdrController.GetDIDRecords([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -105,8 +104,8 @@ func TestVDR_CreateDID(t *testing.T) {
 			method: http.MethodPost, url: mockURL,
 		}
 
-		req := &models.RequestEnvelope{Payload: reqData}
-		resp := vdrController.CreateDID(req)
+		//req := &models.RequestEnvelope{Payload: reqData}
+		resp := vdrController.CreateDID(reqData)
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -128,8 +127,8 @@ func TestVDR_ResolveDID(t *testing.T) {
 			method: http.MethodGet, url: mockURL,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := vdrController.ResolveDID(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := vdrController.ResolveDID([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -156,8 +155,8 @@ func TestVDR_SaveDID(t *testing.T) {
 			method: http.MethodPost, url: mockURL,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := vdrController.SaveDID(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := vdrController.SaveDID([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)

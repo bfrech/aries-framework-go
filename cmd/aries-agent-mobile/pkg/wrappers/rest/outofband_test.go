@@ -12,7 +12,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wrappers/models"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofband"
 )
 
@@ -51,8 +50,8 @@ func TestOutOfBand_AcceptInvitation(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + outofband.AcceptInvitation,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.AcceptInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.AcceptInvitation([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -75,8 +74,8 @@ func TestOutOfBand_ActionContinue(t *testing.T) {
 			method: http.MethodPost, url: mockURL,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.ActionContinue(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.ActionContinue([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -99,8 +98,8 @@ func TestOutOfBand_ActionStop(t *testing.T) {
 			method: http.MethodPost, url: mockURL,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.ActionStop(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.ActionStop([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -120,8 +119,8 @@ func TestOutOfBand_Actions(t *testing.T) {
 			method: http.MethodGet, url: mockAgentURL + outofband.Actions,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.Actions(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.Actions([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -144,8 +143,8 @@ func TestOutOfBand_CreateInvitation(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + outofband.CreateInvitation,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.CreateInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.CreateInvitation([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -168,8 +167,8 @@ func TestOutOfBand_CreateRequest(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + outofband.CreateInvitation,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.CreateInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.CreateInvitation([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)

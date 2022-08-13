@@ -12,29 +12,29 @@ import "github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wra
 type DIDExchangeController interface {
 
 	// CreateInvitation creates a new connection invitation.
-	CreateInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope
+	CreateInvitation(request []byte) *models.ResponseEnvelope
 
 	// ReceiveInvitation receives a new connection invitation.
-	ReceiveInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope
+	ReceiveInvitation(request []byte) *models.ResponseEnvelope
 
 	// AcceptInvitation accepts a stored connection invitation.
-	AcceptInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope
+	AcceptInvitation(request []byte) *models.ResponseEnvelope
 
 	// CreateImplicitInvitation creates implicit invitation using inviter DID.
-	CreateImplicitInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope
+	CreateImplicitInvitation(request []byte) *models.ResponseEnvelope
 
 	// AcceptExchangeRequest accepts a stored connection request.
-	AcceptExchangeRequest(request *models.RequestEnvelope) *models.ResponseEnvelope
+	AcceptExchangeRequest(request []byte) *models.ResponseEnvelope
 
 	// QueryConnections queries agent to agent connections.
-	QueryConnections(request *models.RequestEnvelope) *models.ResponseEnvelope
+	QueryConnections(request []byte) *models.ResponseEnvelope
 
 	// QueryConnectionByID fetches a single connection record by connection ID.
-	QueryConnectionByID(request *models.RequestEnvelope) *models.ResponseEnvelope
+	QueryConnectionByID(request []byte) *models.ResponseEnvelope
 
 	// CreateConnection creates a new connection record in completed state and returns the generated connectionID.
-	CreateConnection(request *models.RequestEnvelope) *models.ResponseEnvelope
+	CreateConnection(request []byte) *models.ResponseEnvelope
 
 	// RemoveConnection removes given connection record.
-	RemoveConnection(request *models.RequestEnvelope) *models.ResponseEnvelope
+	RemoveConnection(request []byte) *models.ResponseEnvelope
 }

@@ -21,38 +21,45 @@ type Mediator struct {
 }
 
 // Register registers the agent with the router.
-func (m *Mediator) Register(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, mediator.RegisterCommandMethod)
+func (m *Mediator) Register(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, mediator.RegisterCommandMethod)
 }
 
 // Unregister unregisters the agent with the router.
-func (m *Mediator) Unregister(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, mediator.UnregisterCommandMethod)
+func (m *Mediator) Unregister(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, mediator.UnregisterCommandMethod)
 }
 
 // Connections returns router`s connections.
-func (m *Mediator) Connections(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, mediator.GetConnectionsCommandMethod)
+func (m *Mediator) Connections(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, mediator.GetConnectionsCommandMethod)
 }
 
 // Reconnect sends noop message to given mediator connection to re-establish network connection.
-func (m *Mediator) Reconnect(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, mediator.ReconnectCommandMethod)
+func (m *Mediator) Reconnect(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, mediator.ReconnectCommandMethod)
 }
 
 // ReconnectAll sends noop message to all mediator connections to re-establish a network connections.
-func (m *Mediator) ReconnectAll(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, mediator.ReconnectAllCommandMethod)
+func (m *Mediator) ReconnectAll(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, mediator.ReconnectAllCommandMethod)
 }
 
 // Status returns details about pending messages for given connection.
-func (m *Mediator) Status(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, mediator.StatusCommandMethod)
+func (m *Mediator) Status(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, mediator.StatusCommandMethod)
 }
 
 // BatchPickup dispatches pending messages for given connection.
-func (m *Mediator) BatchPickup(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, mediator.BatchPickupCommandMethod)
+func (m *Mediator) BatchPickup(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, mediator.BatchPickupCommandMethod)
 }
 
 func (m *Mediator) createRespEnvelope(request *models.RequestEnvelope, endpoint string) *models.ResponseEnvelope {

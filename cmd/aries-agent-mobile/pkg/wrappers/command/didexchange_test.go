@@ -12,7 +12,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wrappers/models"
 	cmddidexch "github.com/hyperledger/aries-framework-go/pkg/controller/command/didexchange"
 )
 
@@ -51,8 +50,8 @@ func TestDIDExchange_CreateInvitation(t *testing.T) {
 
 		payload := fmt.Sprintf(`{"alias":"myalias", "public": "%s"}`, publicDID)
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := de.CreateInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := de.CreateInvitation([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -81,8 +80,8 @@ func TestDIDExchange_ReceiveInvitation(t *testing.T) {
 		"label":"agent",
 		"@type":"https://didcomm.org/didexchange/1.0/invitation"}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := de.ReceiveInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := de.ReceiveInvitation([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -101,8 +100,8 @@ func TestDIDExchange_AcceptInvitation(t *testing.T) {
 
 		payload := mockRequestWithID
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := de.AcceptInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := de.AcceptInvitation([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -121,8 +120,8 @@ func TestDIDExchange_CreateImplicitInvitation(t *testing.T) {
 
 		payload := `{"their_did":"sample-public-did"}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := de.CreateImplicitInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := de.CreateImplicitInvitation([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -143,8 +142,8 @@ func TestDIDExchange_AcceptExchangeRequest(t *testing.T) {
 
 		payload := mockRequestWithID
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := de.AcceptExchangeRequest(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := de.AcceptExchangeRequest([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -165,8 +164,8 @@ func TestDIDExchange_QueryConnections(t *testing.T) {
 
 		payload := `{"state":"requested"}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := de.QueryConnections(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := de.QueryConnections([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -187,8 +186,8 @@ func TestDIDExchange_QueryConnectionByID(t *testing.T) {
 
 		payload := mockRequestWithID
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := de.QueryConnectionByID(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := de.QueryConnectionByID([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -220,8 +219,8 @@ func TestDIDExchange_CreateConnection(t *testing.T) {
 		"parentThreadID":"c838be85-8126-4d2f-9116-7c0fac84c89f",
 		"threadID":"96c40b11-a17c-4d89-a9f0-f6d9aa6d951f","implicit":true}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := de.CreateConnection(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := de.CreateConnection([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -240,8 +239,8 @@ func TestDIDExchange_RemoveConnection(t *testing.T) {
 
 		payload := `{"id":"1234", "myDid": "myDid", "theirDid": "theirDid"}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := de.RemoveConnection(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := de.RemoveConnection([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,

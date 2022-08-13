@@ -20,10 +20,10 @@ type OutOfBand struct {
 }
 
 // CreateInvitation creates and saves an out-of-band invitation.
-func (oob *OutOfBand) CreateInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (oob *OutOfBand) CreateInvitation(request []byte) *models.ResponseEnvelope {
 	args := outofband.CreateInvitationArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -36,10 +36,10 @@ func (oob *OutOfBand) CreateInvitation(request *models.RequestEnvelope) *models.
 }
 
 // AcceptInvitation from another agent and return the ID of the new connection records.
-func (oob *OutOfBand) AcceptInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (oob *OutOfBand) AcceptInvitation(request []byte) *models.ResponseEnvelope {
 	args := outofband.AcceptInvitationArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -52,8 +52,8 @@ func (oob *OutOfBand) AcceptInvitation(request *models.RequestEnvelope) *models.
 }
 
 // Actions returns pending actions that have not yet to be executed or canceled.
-func (oob *OutOfBand) Actions(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	response, cmdErr := exec(oob.handlers[outofband.Actions], request.Payload)
+func (oob *OutOfBand) Actions(request []byte) *models.ResponseEnvelope {
+	response, cmdErr := exec(oob.handlers[outofband.Actions], request)
 	if cmdErr != nil {
 		return &models.ResponseEnvelope{Error: cmdErr}
 	}
@@ -62,10 +62,10 @@ func (oob *OutOfBand) Actions(request *models.RequestEnvelope) *models.ResponseE
 }
 
 // ActionContinue allows continuing with the protocol after an action event was triggered.
-func (oob *OutOfBand) ActionContinue(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (oob *OutOfBand) ActionContinue(request []byte) *models.ResponseEnvelope {
 	args := outofband.ActionContinueArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -78,10 +78,10 @@ func (oob *OutOfBand) ActionContinue(request *models.RequestEnvelope) *models.Re
 }
 
 // ActionStop stops the protocol after an action event was triggered.
-func (oob *OutOfBand) ActionStop(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (oob *OutOfBand) ActionStop(request []byte) *models.ResponseEnvelope {
 	args := outofband.ActionStopArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 

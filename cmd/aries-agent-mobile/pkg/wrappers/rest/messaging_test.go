@@ -12,7 +12,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wrappers/models"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/messaging"
 )
 
@@ -43,8 +42,8 @@ func TestMessaging_RegisterHTTPService(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + messaging.RegisterHTTPOverDIDCommService,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.RegisterHTTPService(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.RegisterHTTPService([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -65,8 +64,8 @@ func TestMessaging_RegisterService(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + messaging.RegisterMsgService,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.RegisterService(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.RegisterService([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -86,8 +85,8 @@ func TestMessaging_Reply(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + messaging.SendReplyMsg,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.Reply(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.Reply([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -107,8 +106,8 @@ func TestMessaging_Send(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + messaging.SendNewMsg,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.Send(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.Send([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -128,8 +127,8 @@ func TestMessaging_Services(t *testing.T) {
 			method: http.MethodGet, url: mockAgentURL + messaging.MsgServiceList,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.Services(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.Services([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -149,8 +148,8 @@ func TestMessaging_UnregisterService(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + messaging.UnregisterMsgService,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.UnregisterService(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.UnregisterService([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)

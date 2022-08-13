@@ -12,23 +12,23 @@ import "github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wra
 type MediatorController interface {
 
 	// Register registers the agent with the router.
-	Register(request *models.RequestEnvelope) *models.ResponseEnvelope
+	Register(request []byte) *models.ResponseEnvelope
 
 	// Unregister unregisters the agent with the router.
-	Unregister(request *models.RequestEnvelope) *models.ResponseEnvelope
+	Unregister(request []byte) *models.ResponseEnvelope
 
 	// Connections returns router`s connections.
-	Connections(request *models.RequestEnvelope) *models.ResponseEnvelope
+	Connections(request []byte) *models.ResponseEnvelope
 
 	// Reconnect sends noop message to given mediator connection to re-establish network connection
-	Reconnect(request *models.RequestEnvelope) *models.ResponseEnvelope
+	Reconnect(request []byte) *models.ResponseEnvelope
 
 	// ReconnectAll Reconnect sends noop message to all mediator connection to re-establish network connections.
-	ReconnectAll(request *models.RequestEnvelope) *models.ResponseEnvelope
+	ReconnectAll(request []byte) *models.ResponseEnvelope
 
 	// Status returns details about pending messages for given connection.
-	Status(request *models.RequestEnvelope) *models.ResponseEnvelope
+	Status(request []byte) *models.ResponseEnvelope
 
 	// BatchPickup dispatches pending messages for given connection.
-	BatchPickup(request *models.RequestEnvelope) *models.ResponseEnvelope
+	BatchPickup(request []byte) *models.ResponseEnvelope
 }

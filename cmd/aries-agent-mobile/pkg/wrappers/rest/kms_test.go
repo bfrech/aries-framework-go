@@ -12,7 +12,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wrappers/models"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/kms"
 )
 
@@ -43,8 +42,8 @@ func TestKMS_CreateKeySet(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + kms.CreateKeySetPath,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.CreateKeySet(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.CreateKeySet([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
@@ -65,8 +64,8 @@ func TestKMS_ImportKey(t *testing.T) {
 			method: http.MethodPost, url: mockAgentURL + kms.ImportKeyPath,
 		}
 
-		req := &models.RequestEnvelope{Payload: []byte(reqData)}
-		resp := controller.ImportKey(req)
+		//req := &models.RequestEnvelope{Payload: []byte(reqData)}
+		resp := controller.ImportKey([]byte(reqData))
 
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)

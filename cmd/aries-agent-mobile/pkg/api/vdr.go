@@ -12,17 +12,17 @@ import "github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wra
 type VDRController interface {
 
 	// ResolveDID resolve did.
-	ResolveDID(request *models.RequestEnvelope) *models.ResponseEnvelope
+	ResolveDID(request []byte) *models.ResponseEnvelope
 
 	// SaveDID saves the did doc to the store.
-	SaveDID(request *models.RequestEnvelope) *models.ResponseEnvelope
+	SaveDID(request []byte) *models.ResponseEnvelope
 
 	// CreateDID create the did doc.
-	CreateDID(request *models.RequestEnvelope) *models.ResponseEnvelope
+	CreateDID(request []byte) *models.ResponseEnvelope
 
 	// GetDID retrieves the did from the store.
-	GetDID(request *models.RequestEnvelope) *models.ResponseEnvelope
+	GetDID(request []byte) *models.ResponseEnvelope
 
 	// GetDIDRecords retrieves the did doc containing name and didID.
-	GetDIDRecords(request *models.RequestEnvelope) *models.ResponseEnvelope
+	GetDIDRecords(request []byte) *models.ResponseEnvelope
 }

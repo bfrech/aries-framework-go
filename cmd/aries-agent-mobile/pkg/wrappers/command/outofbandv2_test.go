@@ -11,7 +11,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wrappers/models"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/command/outofbandv2"
 )
 
@@ -40,8 +39,8 @@ func TestOutOfBandV2_AcceptInvitation(t *testing.T) {
 
 		payload := `{"invitation":{},"my_label":"label"}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := controller.AcceptInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := controller.AcceptInvitation([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -63,8 +62,8 @@ func TestOutOfBandV2_CreateInvitation(t *testing.T) {
 
 		payload := `{"label":"label","body":{"goal":"goal","goal_code":"goal_code","accept":["didcomm/v2"]}}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := controller.CreateInvitation(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := controller.CreateInvitation([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,

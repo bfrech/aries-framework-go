@@ -21,13 +21,15 @@ type KMS struct {
 }
 
 // CreateKeySet create a new public/private encryption and signature key pairs set.
-func (k *KMS) CreateKeySet(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return k.createRespEnvelope(request, kms.CreateKeySetCommandMethod)
+func (k *KMS) CreateKeySet(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return k.createRespEnvelope(req, kms.CreateKeySetCommandMethod)
 }
 
 // ImportKey imports a key.
-func (k *KMS) ImportKey(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return k.createRespEnvelope(request, kms.ImportKeyCommandMethod)
+func (k *KMS) ImportKey(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return k.createRespEnvelope(req, kms.ImportKeyCommandMethod)
 }
 
 func (k *KMS) createRespEnvelope(request *models.RequestEnvelope, endpoint string) *models.ResponseEnvelope {

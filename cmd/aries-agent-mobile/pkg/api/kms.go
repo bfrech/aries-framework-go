@@ -12,8 +12,8 @@ import "github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wra
 type KMSController interface {
 
 	// CreateKeySet create a new public/private encryption and signature key pairs set.
-	CreateKeySet(request *models.RequestEnvelope) *models.ResponseEnvelope
+	CreateKeySet(request []byte) *models.ResponseEnvelope
 
 	// ImportKey imports a key.
-	ImportKey(request *models.RequestEnvelope) *models.ResponseEnvelope
+	ImportKey(request []byte) *models.ResponseEnvelope
 }

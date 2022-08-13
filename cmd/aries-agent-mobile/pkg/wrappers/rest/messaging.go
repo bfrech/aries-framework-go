@@ -21,33 +21,39 @@ type Messaging struct {
 }
 
 // RegisterService registers new message service to message handler registrar.
-func (m *Messaging) RegisterService(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, messaging.RegisterMessageServiceCommandMethod)
+func (m *Messaging) RegisterService(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, messaging.RegisterMessageServiceCommandMethod)
 }
 
 // UnregisterService unregisters given message service handler registrar.
-func (m *Messaging) UnregisterService(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, messaging.UnregisterMessageServiceCommandMethod)
+func (m *Messaging) UnregisterService(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, messaging.UnregisterMessageServiceCommandMethod)
 }
 
 // Services returns list of registered service names.
-func (m *Messaging) Services(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, messaging.RegisteredServicesCommandMethod)
+func (m *Messaging) Services(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, messaging.RegisteredServicesCommandMethod)
 }
 
 // Send sends a new message to destination provided.
-func (m *Messaging) Send(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, messaging.SendNewMessageCommandMethod)
+func (m *Messaging) Send(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, messaging.SendNewMessageCommandMethod)
 }
 
 // Reply sends reply to existing message.
-func (m *Messaging) Reply(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, messaging.SendReplyMessageCommandMethod)
+func (m *Messaging) Reply(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, messaging.SendReplyMessageCommandMethod)
 }
 
 // RegisterHTTPService registers new http over didcomm service to message handler registrar.
-func (m *Messaging) RegisterHTTPService(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	return m.createRespEnvelope(request, messaging.RegisterHTTPMessageServiceCommandMethod)
+func (m *Messaging) RegisterHTTPService(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, messaging.RegisterHTTPMessageServiceCommandMethod)
 }
 
 func (m *Messaging) createRespEnvelope(request *models.RequestEnvelope, endpoint string) *models.ResponseEnvelope {

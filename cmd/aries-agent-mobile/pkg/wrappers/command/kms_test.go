@@ -11,7 +11,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wrappers/models"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/command/kms"
 )
 
@@ -41,8 +40,8 @@ func TestKMS_CreateKeySet(t *testing.T) {
 
 		payload := `{"keyType":"ED25519"}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := controller.CreateKeySet(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := controller.CreateKeySet([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,
@@ -63,8 +62,8 @@ func TestKMS_ImportKey(t *testing.T) {
 		payload := `{"kty":"OKP","kid":"kid","crv":"Ed25519","alg":"EdDSA",
 "x":"jXAvdkE8oHbFat1HYkdq3FXsuPdGtdl8NhKr163kikA","d":"QlXTAvl0V7Kh7ckWXTVmdAdZZQcIdZ0yqXxwvw9QX04"}`
 
-		req := &models.RequestEnvelope{Payload: []byte(payload)}
-		resp := controller.ImportKey(req)
+		//req := &models.RequestEnvelope{Payload: []byte(payload)}
+		resp := controller.ImportKey([]byte(payload))
 		require.NotNil(t, resp)
 		require.Nil(t, resp.Error)
 		require.Equal(t,

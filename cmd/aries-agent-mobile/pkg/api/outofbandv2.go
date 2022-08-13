@@ -11,8 +11,8 @@ import "github.com/hyperledger/aries-framework-go/cmd/aries-agent-mobile/pkg/wra
 // OutOfBandV2Controller defines methods for the out-of-band/2.0 protocol controller.
 type OutOfBandV2Controller interface {
 	// CreateInvitation creates and saves an out-of-band invitation.
-	CreateInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope
+	CreateInvitation(request []byte) *models.ResponseEnvelope
 
 	// AcceptInvitation from another agent and return the ID of the new connection records.
-	AcceptInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope
+	AcceptInvitation(request []byte) *models.ResponseEnvelope
 }

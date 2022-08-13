@@ -20,10 +20,10 @@ type Mediator struct {
 }
 
 // Register registers the agent with the router.
-func (m *Mediator) Register(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (m *Mediator) Register(request []byte) *models.ResponseEnvelope {
 	args := mediator.RegisterRoute{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -36,8 +36,8 @@ func (m *Mediator) Register(request *models.RequestEnvelope) *models.ResponseEnv
 }
 
 // Unregister unregisters the agent with the router.
-func (m *Mediator) Unregister(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	response, cmdErr := exec(m.handlers[mediator.UnregisterCommandMethod], request.Payload)
+func (m *Mediator) Unregister(request []byte) *models.ResponseEnvelope {
+	response, cmdErr := exec(m.handlers[mediator.UnregisterCommandMethod], request)
 	if cmdErr != nil {
 		return &models.ResponseEnvelope{Error: cmdErr}
 	}
@@ -46,8 +46,8 @@ func (m *Mediator) Unregister(request *models.RequestEnvelope) *models.ResponseE
 }
 
 // Connections returns router`s connections.
-func (m *Mediator) Connections(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	response, cmdErr := exec(m.handlers[mediator.GetConnectionsCommandMethod], request.Payload)
+func (m *Mediator) Connections(request []byte) *models.ResponseEnvelope {
+	response, cmdErr := exec(m.handlers[mediator.GetConnectionsCommandMethod], request)
 	if cmdErr != nil {
 		return &models.ResponseEnvelope{Error: cmdErr}
 	}
@@ -56,10 +56,10 @@ func (m *Mediator) Connections(request *models.RequestEnvelope) *models.Response
 }
 
 // Reconnect ends noop message to given mediator connection to re-establish network connection.
-func (m *Mediator) Reconnect(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (m *Mediator) Reconnect(request []byte) *models.ResponseEnvelope {
 	args := mediator.RegisterRoute{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -72,8 +72,8 @@ func (m *Mediator) Reconnect(request *models.RequestEnvelope) *models.ResponseEn
 }
 
 // ReconnectAll sends noop message to all mediator connections to re-establish a network connections.
-func (m *Mediator) ReconnectAll(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	response, cmdErr := exec(m.handlers[mediator.ReconnectAllCommandMethod], request.Payload)
+func (m *Mediator) ReconnectAll(request []byte) *models.ResponseEnvelope {
+	response, cmdErr := exec(m.handlers[mediator.ReconnectAllCommandMethod], request)
 	if cmdErr != nil {
 		return &models.ResponseEnvelope{Error: cmdErr}
 	}
@@ -82,10 +82,10 @@ func (m *Mediator) ReconnectAll(request *models.RequestEnvelope) *models.Respons
 }
 
 // Status returns details about pending messages for given connection.
-func (m *Mediator) Status(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (m *Mediator) Status(request []byte) *models.ResponseEnvelope {
 	args := mediator.StatusRequest{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -98,10 +98,10 @@ func (m *Mediator) Status(request *models.RequestEnvelope) *models.ResponseEnvel
 }
 
 // BatchPickup dispatches pending messages for given connection.
-func (m *Mediator) BatchPickup(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (m *Mediator) BatchPickup(request []byte) *models.ResponseEnvelope {
 	args := mediator.BatchPickupRequest{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 

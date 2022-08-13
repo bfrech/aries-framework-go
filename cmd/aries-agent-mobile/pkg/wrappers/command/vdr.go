@@ -20,10 +20,10 @@ type VDR struct {
 }
 
 // ResolveDID resolve did.
-func (v *VDR) ResolveDID(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (v *VDR) ResolveDID(request []byte) *models.ResponseEnvelope {
 	args := cmdvdr.IDArg{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -36,10 +36,10 @@ func (v *VDR) ResolveDID(request *models.RequestEnvelope) *models.ResponseEnvelo
 }
 
 // CreateDID create the did doc.
-func (v *VDR) CreateDID(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (v *VDR) CreateDID(request []byte) *models.ResponseEnvelope {
 	args := cmdvdr.CreateDIDRequest{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -52,10 +52,10 @@ func (v *VDR) CreateDID(request *models.RequestEnvelope) *models.ResponseEnvelop
 }
 
 // SaveDID saves the did doc to the store.
-func (v *VDR) SaveDID(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (v *VDR) SaveDID(request []byte) *models.ResponseEnvelope {
 	args := cmdvdr.DIDArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -68,10 +68,10 @@ func (v *VDR) SaveDID(request *models.RequestEnvelope) *models.ResponseEnvelope 
 }
 
 // GetDID retrieves the did from the store.
-func (v *VDR) GetDID(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (v *VDR) GetDID(request []byte) *models.ResponseEnvelope {
 	args := cmdvdr.IDArg{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -84,8 +84,8 @@ func (v *VDR) GetDID(request *models.RequestEnvelope) *models.ResponseEnvelope {
 }
 
 // GetDIDRecords retrieves the did doc containing name and didID.
-func (v *VDR) GetDIDRecords(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	response, cmdErr := exec(v.handlers[cmdvdr.GetDIDsCommandMethod], request.Payload)
+func (v *VDR) GetDIDRecords(request []byte) *models.ResponseEnvelope {
+	response, cmdErr := exec(v.handlers[cmdvdr.GetDIDsCommandMethod], request)
 	if cmdErr != nil {
 		return &models.ResponseEnvelope{Error: cmdErr}
 	}

@@ -20,10 +20,10 @@ type Messaging struct {
 }
 
 // RegisterService registers new message service to message handler registrar.
-func (m *Messaging) RegisterService(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (m *Messaging) RegisterService(request []byte) *models.ResponseEnvelope {
 	args := messaging.RegisterMsgSvcArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -36,10 +36,10 @@ func (m *Messaging) RegisterService(request *models.RequestEnvelope) *models.Res
 }
 
 // UnregisterService unregisters given message service handler registrar.
-func (m *Messaging) UnregisterService(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (m *Messaging) UnregisterService(request []byte) *models.ResponseEnvelope {
 	args := messaging.UnregisterMsgSvcArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -52,8 +52,8 @@ func (m *Messaging) UnregisterService(request *models.RequestEnvelope) *models.R
 }
 
 // Services returns list of registered service names.
-func (m *Messaging) Services(request *models.RequestEnvelope) *models.ResponseEnvelope {
-	response, cmdErr := exec(m.handlers[messaging.RegisteredServicesCommandMethod], request.Payload)
+func (m *Messaging) Services(request []byte) *models.ResponseEnvelope {
+	response, cmdErr := exec(m.handlers[messaging.RegisteredServicesCommandMethod], request)
 	if cmdErr != nil {
 		return &models.ResponseEnvelope{Error: cmdErr}
 	}
@@ -62,10 +62,10 @@ func (m *Messaging) Services(request *models.RequestEnvelope) *models.ResponseEn
 }
 
 // Send sends new message to destination provided.
-func (m *Messaging) Send(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (m *Messaging) Send(request []byte) *models.ResponseEnvelope {
 	args := messaging.SendNewMessageArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -78,10 +78,10 @@ func (m *Messaging) Send(request *models.RequestEnvelope) *models.ResponseEnvelo
 }
 
 // Reply sends reply to existing message.
-func (m *Messaging) Reply(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (m *Messaging) Reply(request []byte) *models.ResponseEnvelope {
 	args := messaging.SendReplyMessageArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -94,10 +94,10 @@ func (m *Messaging) Reply(request *models.RequestEnvelope) *models.ResponseEnvel
 }
 
 // RegisterHTTPService registers new http over didcomm service to message handler registrar.
-func (m *Messaging) RegisterHTTPService(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (m *Messaging) RegisterHTTPService(request []byte) *models.ResponseEnvelope {
 	args := messaging.RegisterHTTPMsgSvcArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 

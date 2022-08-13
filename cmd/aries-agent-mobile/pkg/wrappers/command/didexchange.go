@@ -21,10 +21,10 @@ type DIDExchange struct {
 }
 
 // CreateInvitation creates a new connection invitation.
-func (de *DIDExchange) CreateInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (de *DIDExchange) CreateInvitation(request []byte) *models.ResponseEnvelope {
 	args := cmddidexch.CreateInvitationArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -37,10 +37,10 @@ func (de *DIDExchange) CreateInvitation(request *models.RequestEnvelope) *models
 }
 
 // ReceiveInvitation receives a new connection invitation.
-func (de *DIDExchange) ReceiveInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (de *DIDExchange) ReceiveInvitation(request []byte) *models.ResponseEnvelope {
 	args := clientdidexch.Invitation{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -53,10 +53,10 @@ func (de *DIDExchange) ReceiveInvitation(request *models.RequestEnvelope) *model
 }
 
 // AcceptInvitation accepts a stored connection invitation.
-func (de *DIDExchange) AcceptInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (de *DIDExchange) AcceptInvitation(request []byte) *models.ResponseEnvelope {
 	args := cmddidexch.AcceptInvitationArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -69,10 +69,10 @@ func (de *DIDExchange) AcceptInvitation(request *models.RequestEnvelope) *models
 }
 
 // CreateImplicitInvitation creates implicit invitation using inviter DID.
-func (de *DIDExchange) CreateImplicitInvitation(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (de *DIDExchange) CreateImplicitInvitation(request []byte) *models.ResponseEnvelope {
 	args := cmddidexch.ImplicitInvitationArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -85,10 +85,10 @@ func (de *DIDExchange) CreateImplicitInvitation(request *models.RequestEnvelope)
 }
 
 // AcceptExchangeRequest accepts a stored connection request.
-func (de *DIDExchange) AcceptExchangeRequest(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (de *DIDExchange) AcceptExchangeRequest(request []byte) *models.ResponseEnvelope {
 	args := cmddidexch.AcceptExchangeRequestArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -101,10 +101,10 @@ func (de *DIDExchange) AcceptExchangeRequest(request *models.RequestEnvelope) *m
 }
 
 // QueryConnections queries agent to agent connections.
-func (de *DIDExchange) QueryConnections(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (de *DIDExchange) QueryConnections(request []byte) *models.ResponseEnvelope {
 	args := cmddidexch.QueryConnectionsArgs{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -117,10 +117,10 @@ func (de *DIDExchange) QueryConnections(request *models.RequestEnvelope) *models
 }
 
 // QueryConnectionByID fetches a single connection record by connection ID.
-func (de *DIDExchange) QueryConnectionByID(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (de *DIDExchange) QueryConnectionByID(request []byte) *models.ResponseEnvelope {
 	args := cmddidexch.ConnectionIDArg{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -133,10 +133,10 @@ func (de *DIDExchange) QueryConnectionByID(request *models.RequestEnvelope) *mod
 }
 
 // CreateConnection creates a new connection record in completed state and returns the generated connectionID.
-func (de *DIDExchange) CreateConnection(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (de *DIDExchange) CreateConnection(request []byte) *models.ResponseEnvelope {
 	args := cmddidexch.CreateConnectionRequest{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
@@ -149,10 +149,10 @@ func (de *DIDExchange) CreateConnection(request *models.RequestEnvelope) *models
 }
 
 // RemoveConnection removes given connection record.
-func (de *DIDExchange) RemoveConnection(request *models.RequestEnvelope) *models.ResponseEnvelope {
+func (de *DIDExchange) RemoveConnection(request []byte) *models.ResponseEnvelope {
 	args := cmddidexch.ConnectionIDArg{}
 
-	if err := json.Unmarshal(request.Payload, &args); err != nil {
+	if err := json.Unmarshal(request, &args); err != nil {
 		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
 	}
 
