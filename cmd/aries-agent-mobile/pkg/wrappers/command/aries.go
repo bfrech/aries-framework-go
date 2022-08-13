@@ -8,6 +8,7 @@ package command
 
 import (
 	"fmt"
+	"github.com/hyperledger/aries-framework-go/pkg/controller/command/connection"
 	"net/http"
 	"strings"
 	"sync"
@@ -413,6 +414,16 @@ func (a *Aries) GetOutOfBandV2Controller() (api.OutOfBandV2Controller, error) {
 	}
 
 	return &OutOfBandV2{handlers: handlers}, nil
+}
+
+// GetConnectionController returns a ConnectionController instance.
+func (a *Aries) GetConnectionController() (api.ConnectionController, error) {
+	handlers, ok := a.handlers[connection.CommandName]
+	if !ok {
+		return nil, fmt.Errorf("no handlers found for controller [%s]", connection.CommandName)
+	}
+
+	return &Connection{handlers: handlers}, nil
 }
 
 // GetKMSController returns a KMS instance.

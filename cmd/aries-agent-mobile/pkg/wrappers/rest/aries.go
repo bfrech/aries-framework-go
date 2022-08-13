@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/hyperledger/aries-framework-go/pkg/controller/command/connection"
 	"net/http"
 	"strings"
 	"sync"
@@ -271,6 +272,16 @@ func (ar *Aries) GetOutOfBandV2Controller() (api.OutOfBandV2Controller, error) {
 	// TODO: implement OOB V2 Rest
 
 	return nil, nil
+}
+
+// GetConnectionController returns a ConnectionController instance.
+func (ar *Aries) GetConnectionController() (api.ConnectionController, error) {
+	endpoints, ok := ar.endpoints[connection.CommandName]
+	if !ok {
+		return nil, fmt.Errorf("no endpoints found for controller [%s]", connection.CommandName)
+	}
+
+	return &Connection{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
 }
 
 // GetKMSController returns a KMS instance.

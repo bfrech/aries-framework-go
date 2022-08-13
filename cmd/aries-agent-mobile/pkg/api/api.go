@@ -39,6 +39,9 @@ type AriesController interface {
 	// GetOutOfBandV2Controller returns an implementation of OutOfBandV2Controller
 	GetOutOfBandV2Controller() (OutOfBandV2Controller, error)
 
+	// GetConnectionController returns an implementation of ConnectionController
+	GetConnectionController() (ConnectionController, error)
+
 	// GetKMSController returns an implementation of KMSController
 	GetKMSController() (KMSController, error)
 
