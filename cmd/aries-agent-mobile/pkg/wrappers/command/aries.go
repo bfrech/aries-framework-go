@@ -109,6 +109,10 @@ func prepareFrameworkOptions(opts *config.Options) ([]aries.Option, error) {
 	var options []aries.Option
 	options = append(options, aries.WithMessageServiceProvider(opts.MsgHandler))
 
+	if opts.MediaTypeProfiles != " " {
+		options = append(options, aries.WithMediaTypeProfiles([]string{opts.MediaTypeProfiles}))
+	}
+
 	if opts.TransportReturnRoute != "" {
 		options = append(options, aries.WithTransportReturnRoute(opts.TransportReturnRoute))
 	}
