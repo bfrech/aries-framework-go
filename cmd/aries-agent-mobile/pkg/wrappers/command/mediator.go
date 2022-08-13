@@ -128,3 +128,19 @@ func (m *Mediator) RegisterKey(request []byte) *models.ResponseEnvelope {
 
 	return &models.ResponseEnvelope{Payload: response}
 }
+
+// UnregisterKey removes a key from the router.
+func (m *Mediator) UnregisterKey(request []byte) *models.ResponseEnvelope {
+	args := mediator.RegisterKey{}
+
+	if err := json.Unmarshal(request, &args); err != nil {
+		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
+	}
+
+	response, cmdErr := exec(m.handlers[mediator.UnregisterKeyCommandMethod], args)
+	if cmdErr != nil {
+		return &models.ResponseEnvelope{Error: cmdErr}
+	}
+
+	return &models.ResponseEnvelope{Payload: response}
+}

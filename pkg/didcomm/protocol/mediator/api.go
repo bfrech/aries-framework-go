@@ -16,4 +16,7 @@ type ProtocolService interface {
 
 	// GetConnections returns all router connections
 	GetConnections(options ...ConnectionOption) ([]string, error)
+
+	// RemoveKey removes agents recKey from the router
+	RemoveKey(connID, recKey string) error
 }

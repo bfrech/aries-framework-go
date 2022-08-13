@@ -34,3 +34,12 @@ func AddKeyToRouter(routeSvc ProtocolService, connID, recKey string) error {
 
 	return nil
 }
+
+// RemoveKeyFromRouter util to add the recipient keys to the router.
+func RemoveKeyFromRouter(routeSvc ProtocolService, connID, recKey string) error {
+	if err := routeSvc.RemoveKey(connID, recKey); err != nil && !errors.Is(err, ErrRouterNotRegistered) {
+		return fmt.Errorf("removeKey: %w", err)
+	}
+
+	return nil
+}

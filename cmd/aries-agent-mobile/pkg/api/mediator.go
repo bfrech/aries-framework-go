@@ -34,4 +34,7 @@ type MediatorController interface {
 
 	// RegisterKey registers a new key with the mediator
 	RegisterKey(request []byte) *models.ResponseEnvelope
+
+	// UnregisterKey removes a key from the mediator
+	UnregisterKey(request []byte) *models.ResponseEnvelope
 }

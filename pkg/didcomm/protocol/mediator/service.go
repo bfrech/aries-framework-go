@@ -514,13 +514,20 @@ func (s *Service) handleKeylistUpdate(msg service.DIDCommMsg, myDID, theirDID st
 				Result:       result,
 			})
 		} else if v.Action == remove {
-			// TODO remove from the store
+
+			result := success
+			toKey := dataKey(v.RecipientKey)
+			err = s.routeStore.Delete(toKey)
+			if err != nil {
+				logger.Errorf("failed to delete the route key from the store : %s", err)
+				result = serverError
+			}
 
 			// construct the response doc
 			updates = append(updates, UpdateResponse{
 				RecipientKey: v.RecipientKey,
 				Action:       v.Action,
-				Result:       serverError,
+				Result:       result,
 			})
 		}
 	}
@@ -784,6 +791,58 @@ func (s *Service) AddKey(connID, recKey string) error {
 			{
 				RecipientKey: recKey,
 				Action:       add,
+			},
+		},
+	}
+
+	if err := s.outbound.SendToDID(service.NewDIDCommMsgMap(keyUpdate), conn.MyDID, conn.TheirDID); err != nil {
+		return fmt.Errorf("send route request: %w", err)
+	}
+
+	select {
+	case keyUpdateResp := <-keyUpdateCh:
+		if err := processKeylistUpdateResp(recKey, keyUpdateResp); err != nil {
+			return err
+		}
+	case <-time.After(updateTimeout):
+		return errors.New("timeout waiting for keylist update response from the router")
+	}
+
+	// remove the channel once its been processed
+	s.setKeyUpdateResponseCh(msgID, nil)
+
+	return nil
+}
+
+// RemoveKey removes a recKey of the agent to the registered router. This method blocks until a response is
+// received from the router or it times out.
+func (s *Service) RemoveKey(connID, recKey string) error {
+	// check if router is already registered
+	err := s.ensureConnectionExists(connID)
+	if err != nil {
+		return fmt.Errorf("ensure connection exists: %w", err)
+	}
+
+	// get the connection record for the ID to fetch DID information
+	conn, err := s.getConnection(connID)
+	if err != nil {
+		return fmt.Errorf("get connection: %w", err)
+	}
+
+	// generate message ID
+	msgID := uuid.New().String()
+
+	// register chan for callback processing
+	keyUpdateCh := make(chan *KeylistUpdateResponse)
+	s.setKeyUpdateResponseCh(msgID, keyUpdateCh)
+
+	keyUpdate := &KeylistUpdate{
+		ID:   msgID,
+		Type: KeylistUpdateMsgType,
+		Updates: []Update{
+			{
+				RecipientKey: recKey,
+				Action:       remove,
 			},
 		},
 	}

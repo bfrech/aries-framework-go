@@ -136,3 +136,19 @@ func (c *Client) RegisterKey(connectionID string, keyDID string) error {
 
 	return nil
 }
+
+// UnregisterKey with the mediator
+func (c *Client) UnregisterKey(connectionID string, keyDID string) error {
+	if connectionID != "" {
+
+		if err := mediator.RemoveKeyFromRouter(c.mediatorSvc, connectionID, keyDID); err != nil {
+			return fmt.Errorf("createInvitation: RemoveKeyFromRouter: %w", err)
+		}
+	}
+
+	if err := c.routeSvc.Register(connectionID, c.options...); err != nil {
+		return fmt.Errorf("router registration : %w", err)
+	}
+
+	return nil
+}

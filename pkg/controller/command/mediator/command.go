@@ -79,6 +79,7 @@ const (
 	BatchPickupCommandMethod    = "BatchPickup"
 	ReconnectAllCommandMethod   = "ReconnectAll"
 	RegisterKeyCommandMethod    = "RegisterKey"
+	UnregisterKeyCommandMethod  = "UnregisterKey"
 
 	// log constants.
 	connectionID  = "connectionID"
@@ -153,6 +154,7 @@ func (o *Command) GetHandlers() []command.Handler {
 		cmdutil.NewCommandHandler(CommandName, StatusCommandMethod, o.Status),
 		cmdutil.NewCommandHandler(CommandName, BatchPickupCommandMethod, o.BatchPickup),
 		cmdutil.NewCommandHandler(CommandName, RegisterKeyCommandMethod, o.RegisterKey),
+		cmdutil.NewCommandHandler(CommandName, UnregisterKeyCommandMethod, o.UnregisterKey),
 	}
 }
 
@@ -391,12 +393,12 @@ func (o *Command) RegisterKey(rw io.Writer, req io.Reader) command.Error {
 
 	err := json.NewDecoder(req).Decode(&request)
 	if err != nil {
-		logutil.LogInfo(logger, CommandName, RegisterCommandMethod, err.Error())
+		logutil.LogInfo(logger, CommandName, RegisterKeyCommandMethod, err.Error())
 		return command.NewValidationError(InvalidRequestErrorCode, fmt.Errorf("request decode : %w", err))
 	}
 
 	if request.ConnectionID == "" {
-		logutil.LogDebug(logger, CommandName, RegisterCommandMethod, "missing connectionID",
+		logutil.LogDebug(logger, CommandName, RegisterKeyCommandMethod, "missing connectionID",
 			logutil.CreateKeyValueString(connectionID, request.ConnectionID))
 		return command.NewValidationError(RegisterMissingConnIDCode, errors.New("connectionID is mandatory"))
 	}
@@ -404,6 +406,34 @@ func (o *Command) RegisterKey(rw io.Writer, req io.Reader) command.Error {
 	o.routeClient.RegisterKey(request.ConnectionID, request.DIDKey)
 	if err != nil {
 		logutil.LogError(logger, CommandName, RegisterKeyCommandMethod, err.Error(),
+			logutil.CreateKeyValueString(connectionID, request.ConnectionID))
+		return command.NewExecuteError(RegisterRouterErrorCode, err)
+	}
+
+	command.WriteNillableResponse(rw, nil, logger)
+
+	return nil
+}
+
+// UnregisterKey removes a new key from the mediator
+func (o *Command) UnregisterKey(rw io.Writer, req io.Reader) command.Error {
+	var request RegisterKey
+
+	err := json.NewDecoder(req).Decode(&request)
+	if err != nil {
+		logutil.LogInfo(logger, CommandName, UnregisterKeyCommandMethod, err.Error())
+		return command.NewValidationError(InvalidRequestErrorCode, fmt.Errorf("request decode : %w", err))
+	}
+
+	if request.ConnectionID == "" {
+		logutil.LogDebug(logger, CommandName, UnregisterKeyCommandMethod, "missing connectionID",
+			logutil.CreateKeyValueString(connectionID, request.ConnectionID))
+		return command.NewValidationError(RegisterMissingConnIDCode, errors.New("connectionID is mandatory"))
+	}
+
+	o.routeClient.UnregisterKey(request.ConnectionID, request.DIDKey)
+	if err != nil {
+		logutil.LogError(logger, CommandName, UnregisterKeyCommandMethod, err.Error(),
 			logutil.CreateKeyValueString(connectionID, request.ConnectionID))
 		return command.NewExecuteError(RegisterRouterErrorCode, err)
 	}

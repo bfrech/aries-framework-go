@@ -62,10 +62,16 @@ func (m *Mediator) BatchPickup(request []byte) *models.ResponseEnvelope {
 	return m.createRespEnvelope(req, mediator.BatchPickupCommandMethod)
 }
 
-// RegisterKey registers the agent with the router.
+// RegisterKey registers a new key with the router.
 func (m *Mediator) RegisterKey(request []byte) *models.ResponseEnvelope {
 	req := &models.RequestEnvelope{Payload: request}
 	return m.createRespEnvelope(req, mediator.RegisterKeyCommandMethod)
+}
+
+// UnregisterKey removes the key from the router.
+func (m *Mediator) UnregisterKey(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return m.createRespEnvelope(req, mediator.UnregisterKeyCommandMethod)
 }
 
 func (m *Mediator) createRespEnvelope(request *models.RequestEnvelope, endpoint string) *models.ResponseEnvelope {
