@@ -265,6 +265,14 @@ func (ar *Aries) GetOutOfBandController() (api.OutOfBandController, error) {
 	return &OutOfBand{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
 }
 
+// GetOutOfBandV2Controller returns a OutOfBandV2 instance.
+func (ar *Aries) GetOutOfBandV2Controller() (api.OutOfBandV2Controller, error) {
+
+	// TODO: implement OOB V2 Rest
+
+	return nil, nil
+}
+
 // GetKMSController returns a KMS instance.
 func (ar *Aries) GetKMSController() (api.KMSController, error) {
 	endpoints, ok := ar.endpoints[kms.KmsOperationID]
