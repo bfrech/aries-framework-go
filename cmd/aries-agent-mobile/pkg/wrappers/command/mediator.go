@@ -112,3 +112,19 @@ func (m *Mediator) BatchPickup(request []byte) *models.ResponseEnvelope {
 
 	return &models.ResponseEnvelope{Payload: response}
 }
+
+// RegisterKey registers a new key with the router.
+func (m *Mediator) RegisterKey(request []byte) *models.ResponseEnvelope {
+	args := mediator.RegisterKey{}
+
+	if err := json.Unmarshal(request, &args); err != nil {
+		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
+	}
+
+	response, cmdErr := exec(m.handlers[mediator.RegisterKeyCommandMethod], args)
+	if cmdErr != nil {
+		return &models.ResponseEnvelope{Error: cmdErr}
+	}
+
+	return &models.ResponseEnvelope{Payload: response}
+}

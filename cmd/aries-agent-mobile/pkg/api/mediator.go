@@ -31,4 +31,7 @@ type MediatorController interface {
 
 	// BatchPickup dispatches pending messages for given connection.
 	BatchPickup(request []byte) *models.ResponseEnvelope
+
+	// RegisterKey registers a new key with the mediator
+	RegisterKey(request []byte) *models.ResponseEnvelope
 }

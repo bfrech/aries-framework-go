@@ -78,6 +78,7 @@ const (
 	StatusCommandMethod         = "Status"
 	BatchPickupCommandMethod    = "BatchPickup"
 	ReconnectAllCommandMethod   = "ReconnectAll"
+	RegisterKeyCommandMethod    = "RegisterKey"
 
 	// log constants.
 	connectionID  = "connectionID"
@@ -151,6 +152,7 @@ func (o *Command) GetHandlers() []command.Handler {
 		cmdutil.NewCommandHandler(CommandName, ReconnectAllCommandMethod, o.ReconnectAll),
 		cmdutil.NewCommandHandler(CommandName, StatusCommandMethod, o.Status),
 		cmdutil.NewCommandHandler(CommandName, BatchPickupCommandMethod, o.BatchPickup),
+		cmdutil.NewCommandHandler(CommandName, RegisterKeyCommandMethod, o.RegisterKey),
 	}
 }
 
@@ -379,6 +381,34 @@ func (o *Command) BatchPickup(rw io.Writer, req io.Reader) command.Error {
 
 	logutil.LogDebug(logger, CommandName, BatchPickupCommandMethod, successString,
 		logutil.CreateKeyValueString(connectionID, request.ConnectionID))
+
+	return nil
+}
+
+// RegisterKey registers a new key with the mediator
+func (o *Command) RegisterKey(rw io.Writer, req io.Reader) command.Error {
+	var request RegisterKey
+
+	err := json.NewDecoder(req).Decode(&request)
+	if err != nil {
+		logutil.LogInfo(logger, CommandName, RegisterCommandMethod, err.Error())
+		return command.NewValidationError(InvalidRequestErrorCode, fmt.Errorf("request decode : %w", err))
+	}
+
+	if request.ConnectionID == "" {
+		logutil.LogDebug(logger, CommandName, RegisterCommandMethod, "missing connectionID",
+			logutil.CreateKeyValueString(connectionID, request.ConnectionID))
+		return command.NewValidationError(RegisterMissingConnIDCode, errors.New("connectionID is mandatory"))
+	}
+
+	o.routeClient.RegisterKey(request.ConnectionID, request.DIDKey)
+	if err != nil {
+		logutil.LogError(logger, CommandName, RegisterKeyCommandMethod, err.Error(),
+			logutil.CreateKeyValueString(connectionID, request.ConnectionID))
+		return command.NewExecuteError(RegisterRouterErrorCode, err)
+	}
+
+	command.WriteNillableResponse(rw, nil, logger)
 
 	return nil
 }

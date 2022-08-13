@@ -71,3 +71,9 @@ type CreateInvitationResponse struct {
 	// Invitation is out-of-band invitation from mediator.
 	Invitation *outofband.Invitation `json:"invitation"`
 }
+
+// RegisterKey contains parameters for registeringa key with the router
+type RegisterKey struct {
+	ConnectionID string `json:"connectionID"`
+	DIDKey       string `json:"did_key"`
+}

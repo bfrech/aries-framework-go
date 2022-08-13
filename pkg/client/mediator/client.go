@@ -23,8 +23,9 @@ type provider interface {
 // Client enable access to route api.
 type Client struct {
 	service.Event
-	routeSvc protocolService
-	options  []mediator.ClientOption
+	routeSvc    protocolService
+	options     []mediator.ClientOption
+	mediatorSvc mediator.ProtocolService
 }
 
 // protocolService defines DID Exchange service.
@@ -59,15 +60,26 @@ func New(ctx provider, options ...mediator.ClientOption) (*Client, error) {
 		return nil, err
 	}
 
+	s, err := ctx.Service(mediator.Coordination)
+	if err != nil {
+		return nil, err
+	}
+
+	mediatorSvc, ok := s.(mediator.ProtocolService)
+	if !ok {
+		return nil, errors.New("cast service to Route Service failed")
+	}
+
 	routeSvc, ok := svc.(protocolService)
 	if !ok {
 		return nil, errors.New("cast service to route service failed")
 	}
 
 	return &Client{
-		Event:    routeSvc,
-		routeSvc: routeSvc,
-		options:  options,
+		Event:       routeSvc,
+		routeSvc:    routeSvc,
+		options:     options,
+		mediatorSvc: mediatorSvc,
 	}, nil
 }
 
@@ -108,4 +120,19 @@ func (c *Client) GetConfig(connID string) (*mediator.Config, error) {
 	}
 
 	return conf, nil
+}
+
+// RegisterKey with the mediator
+func (c *Client) RegisterKey(connectionID string, keyDID string) error {
+	if connectionID != "" {
+		if err := mediator.AddKeyToRouter(c.mediatorSvc, connectionID, keyDID); err != nil {
+			return fmt.Errorf("createInvitation: AddKeyToRouter: %w", err)
+		}
+	}
+
+	if err := c.routeSvc.Register(connectionID, c.options...); err != nil {
+		return fmt.Errorf("router registration : %w", err)
+	}
+
+	return nil
 }
