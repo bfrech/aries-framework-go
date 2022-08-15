@@ -26,6 +26,12 @@ func (k *KMS) CreateKeySet(request []byte) *models.ResponseEnvelope {
 	return k.createRespEnvelope(req, kms.CreateKeySetCommandMethod)
 }
 
+// CreateKeyWithDIDKey create a new public/private encryption and signature key pairs set.
+func (k *KMS) CreateKeyWithDIDKey(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return k.createRespEnvelope(req, kms.CreateKeyDIDCommandMethod)
+}
+
 // ImportKey imports a key.
 func (k *KMS) ImportKey(request []byte) *models.ResponseEnvelope {
 	req := &models.RequestEnvelope{Payload: request}

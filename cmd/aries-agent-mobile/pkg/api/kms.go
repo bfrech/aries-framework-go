@@ -16,4 +16,7 @@ type KMSController interface {
 
 	// ImportKey imports a key.
 	ImportKey(request []byte) *models.ResponseEnvelope
+
+	// CreateKeyWithDIDKey imports a key.
+	CreateKeyWithDIDKey(request []byte) *models.ResponseEnvelope
 }

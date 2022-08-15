@@ -11,6 +11,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/hyperledger/aries-framework-go/pkg/doc/util/kmsdidkey"
+	"github.com/hyperledger/aries-framework-go/pkg/vdr/fingerprint"
 	"io"
 
 	"github.com/hyperledger/aries-framework-go/pkg/common/log"
@@ -31,6 +33,8 @@ const (
 	CreateKeySetError
 	// ImportKeyError is for failures while importing key.
 	ImportKeyError
+	// CreateKeyDIDError is for failure while creating key did for pubKeyBytes
+	CreateKeyDIDError
 )
 
 // constants for KMS commands.
@@ -41,6 +45,7 @@ const (
 	// command methods.
 	CreateKeySetCommandMethod = "CreateKeySet"
 	ImportKeyCommandMethod    = "ImportKey"
+	CreateKeyDIDCommandMethod = "CreateKeyDID"
 
 	// error messages.
 	errEmptyKeyType = "key type is mandatory"
@@ -75,6 +80,7 @@ func (o *Command) GetHandlers() []command.Handler {
 	return []command.Handler{
 		cmdutil.NewCommandHandler(CommandName, CreateKeySetCommandMethod, o.CreateKeySet),
 		cmdutil.NewCommandHandler(CommandName, ImportKeyCommandMethod, o.ImportKey),
+		cmdutil.NewCommandHandler(CommandName, CreateKeyDIDCommandMethod, o.CreateKeyWithKeyDidFingerprint),
 	}
 }
 
@@ -105,6 +111,50 @@ func (o *Command) CreateKeySet(rw io.Writer, req io.Reader) command.Error {
 	}, logger)
 
 	logutil.LogDebug(logger, CommandName, CreateKeySetCommandMethod, "success")
+
+	return nil
+}
+
+// CreateKeyWithKeyDidFingerprint creates a key according to key type and did:key ID using the multicodec key fingerprint.
+func (o *Command) CreateKeyWithKeyDidFingerprint(rw io.Writer, req io.Reader) command.Error {
+	var request CreateKeySetRequest
+
+	err := json.NewDecoder(req).Decode(&request)
+	if err != nil {
+		logutil.LogInfo(logger, CommandName, CreateKeyDIDCommandMethod, err.Error())
+		return command.NewValidationError(InvalidRequestErrorCode, fmt.Errorf("failed request decode : %w", err))
+	}
+
+	if request.KeyType == "" {
+		logutil.LogDebug(logger, CommandName, CreateKeyDIDCommandMethod, errEmptyKeyType)
+		return command.NewValidationError(InvalidRequestErrorCode, fmt.Errorf(errEmptyKeyType))
+	}
+
+	keyID, pubKeyBytes, err := o.ctx.KMS().CreateAndExportPubKeyBytes(kms.KeyType(request.KeyType))
+	if err != nil {
+		logutil.LogError(logger, CommandName, CreateKeyDIDCommandMethod, err.Error())
+		return command.NewExecuteError(CreateKeySetError, err)
+	}
+
+	var didKey string
+
+	switch request.KeyType {
+	case string(kms.ED25519Type):
+		didKey, _ = fingerprint.CreateDIDKey(pubKeyBytes)
+	default:
+		didKey, err = kmsdidkey.BuildDIDKeyByKeyType(pubKeyBytes, kms.KeyType(request.KeyType))
+		if err != nil {
+			return command.NewExecuteError(CreateKeyDIDError, fmt.Errorf("createKeyDID: failed to build did:key by key type: %w", err))
+		}
+	}
+
+	command.WriteNillableResponse(rw, &CreateKeyWithKeyDIDResponse{
+		KeyID:     keyID,
+		PublicKey: base64.RawURLEncoding.EncodeToString(pubKeyBytes),
+		KeyDID:    didKey,
+	}, logger)
+
+	logutil.LogDebug(logger, CommandName, CreateKeyDIDCommandMethod, "success")
 
 	return nil
 }

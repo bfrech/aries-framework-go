@@ -19,6 +19,16 @@ type CreateKeySetResponse struct {
 	PublicKey string `json:"publicKey,omitempty"`
 }
 
+// CreateKeyWithKeyDIDResponse for returning key pair.
+type CreateKeyWithKeyDIDResponse struct {
+	//  key id base64 encoded
+	KeyID string `json:"keyID,omitempty"`
+	//  public key base64 encoded
+	PublicKey string `json:"publicKey,omitempty"`
+	// did:key
+	KeyDID string `json:"keyDID,omitempty"`
+}
+
 // JSONWebKey contains subset of json web key json properties.
 type JSONWebKey struct {
 	Use string `json:"use,omitempty"`

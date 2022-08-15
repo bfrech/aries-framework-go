@@ -44,3 +44,19 @@ func (k *KMS) ImportKey(request []byte) *models.ResponseEnvelope {
 
 	return &models.ResponseEnvelope{Payload: response}
 }
+
+// CreateKeyWithDIDKey create a new public/private encryption and signature key pairs set.
+func (k *KMS) CreateKeyWithDIDKey(request []byte) *models.ResponseEnvelope {
+	args := kms.CreateKeySetRequest{}
+
+	if err := json.Unmarshal(request, &args); err != nil {
+		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
+	}
+
+	response, cmdErr := exec(k.handlers[kms.CreateKeyDIDCommandMethod], args)
+	if cmdErr != nil {
+		return &models.ResponseEnvelope{Error: cmdErr}
+	}
+
+	return &models.ResponseEnvelope{Payload: response}
+}
