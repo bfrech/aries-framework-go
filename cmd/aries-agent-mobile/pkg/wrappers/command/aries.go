@@ -9,6 +9,8 @@ package command
 import (
 	"fmt"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/command/connection"
+	"github.com/hyperledger/aries-framework-go/pkg/didcomm/common/service"
+	"github.com/hyperledger/aries-framework-go/pkg/didcomm/messaging/service/basic"
 	"net/http"
 	"strings"
 	"sync"
@@ -80,9 +82,28 @@ func NewAries(opts *config.Options) (*Aries, error) {
 	}
 
 	notifications := make(chan notifier.NotificationPayload)
+	notifier := notifier.NewNotifier(notifications)
+
+	// Basic Message registration
+	basicMessage, err := basic.NewMessageService("basicmessage", func(message basic.Message, ctx service.DIDCommContext) error {
+		content := fmt.Sprintf(`{"message": "%s" }`, message.Content)
+		err := notifier.Notify("basicmessage", []byte(content))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create basic message service: %w", err)
+	}
+
+	err = opts.MsgHandler.Register(basicMessage)
+	if err != nil {
+		return nil, fmt.Errorf("failed to register basic message service: %w", err)
+	}
 
 	commandHandlers, err := controller.GetCommandHandlers(ctx,
-		controller.WithNotifier(notifier.NewNotifier(notifications)),
+		controller.WithNotifier(notifier),
 		controller.WithAutoAccept(opts.AutoAccept),
 		controller.WithMessageHandler(opts.MsgHandler),
 	)
