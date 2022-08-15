@@ -310,6 +310,32 @@ func (s *Service) AcceptInvitation(i *Invitation, opts ...AcceptOption) (string,
 
 	senderDoc, err := s.vdrRegistry.Resolve(i.From)
 	if err != nil {
+		// Get DID doc from attachment if DID is not resolvable
+		for _, atchmnt := range i.Requests {
+			if atchmnt.ID == "peer-connection-request" {
+				serviceRequest, err := atchmnt.Data.Fetch()
+				if err != nil {
+					logger.Debugf("oob/2.0 fetching attachment request failed:"+
+						" %v, skipping attachment entry..", err)
+					continue
+				}
+
+				// parse DID Doc
+				didDoc := &did.Doc{}
+				err = didDoc.UnmarshalJSON(serviceRequest)
+				if err != nil {
+					logger.Debugf("oob/2.0 fetching attachment request failed:"+
+						" %v, skipping attachment entry..", err)
+					continue
+				}
+
+				senderDoc = &did.DocResolution{DIDDocument: didDoc}
+				s.vdrRegistry.Create(peer.DIDMethod, senderDoc.DIDDocument, vdrapi.WithOption("store", true))
+			} else {
+				return "", fmt.Errorf("oob/2.0 failed to resolve DID Doc from attachment : %w", senderDoc)
+			}
+		}
+
 		return "", fmt.Errorf("oob/2.0 failed to resolve inviter DID: %w", err)
 	}
 
