@@ -168,6 +168,23 @@ func (c *Client) SetConnectionToDIDCommV2(connID string) error {
 	return nil
 }
 
+// UpdateTheirDIDForConnection updates TheirDID for the connection ID
+func (c *Client) UpdateTheirDIDForConnection(connID string, theirDIDNew string) error {
+	connRec, err := c.connectionRecorder.GetConnectionRecord(connID)
+	if err != nil {
+		return fmt.Errorf("failed to get connection: %w", err)
+	}
+
+	connRec.TheirDID = theirDIDNew
+
+	err = c.connectionRecorder.SaveConnectionRecord(connRec)
+	if err != nil {
+		return fmt.Errorf("failed to save updated connection: %w", err)
+	}
+
+	return nil
+}
+
 type rotateDIDOpts struct {
 	createPeerDID bool
 	newDID        string

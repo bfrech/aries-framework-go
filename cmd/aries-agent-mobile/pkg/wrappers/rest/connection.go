@@ -23,6 +23,11 @@ func (ir *Connection) CreateConnectionV2(request []byte) *models.ResponseEnvelop
 	return ir.createRespEnvelope(req, cmdconnection.CreateV2CommandMethod)
 }
 
+func (ir *Connection) UpdateTheirDIDForConnection(request []byte) *models.ResponseEnvelope {
+	req := &models.RequestEnvelope{Payload: request}
+	return ir.createRespEnvelope(req, cmdconnection.UpdateTheirDIDForConnectionCommandMethod)
+}
+
 func (ir *Connection) createRespEnvelope(request *models.RequestEnvelope, endpoint string) *models.ResponseEnvelope {
 	return exec(&restOperation{
 		url:        ir.URL,

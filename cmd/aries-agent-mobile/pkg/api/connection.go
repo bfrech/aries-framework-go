@@ -10,4 +10,7 @@ type ConnectionController interface {
 
 	// CreateConnectionV2 creates a DIDComm V2 connection with the given DID.
 	CreateConnectionV2(request []byte) *models.ResponseEnvelope
+
+	// UpdateTheirDIDForConnection updates TheirDID for the given connection entry.
+	UpdateTheirDIDForConnection(request []byte) *models.ResponseEnvelope
 }

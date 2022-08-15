@@ -29,9 +29,10 @@ var logger = log.New("aries-framework/controller/connection")
 const (
 	CommandName = "connection"
 
-	RotateDIDCommandMethod = "RotateDID"
-	CreateV2CommandMethod  = "CreateConnectionV2"
-	SetToV2CommandMethod   = "SetConnectionToDIDCommV2"
+	RotateDIDCommandMethod                   = "RotateDID"
+	CreateV2CommandMethod                    = "CreateConnectionV2"
+	SetToV2CommandMethod                     = "SetConnectionToDIDCommV2"
+	UpdateTheirDIDForConnectionCommandMethod = "UpdateTheirDID"
 
 	errEmptyConnID   = "empty connection ID"
 	errEmptyKID      = "empty signing KID"
@@ -56,6 +57,8 @@ const (
 	SetToDIDCommV2ErrorCode
 	// RotateDIDErrorCode is for failures in rotate DID command.
 	RotateDIDErrorCode
+	// UpdateTheirDIDErrorCode is for failures during their DID update in connection entry.
+	UpdateTheirDIDErrorCode
 )
 
 type provider interface {
@@ -92,6 +95,7 @@ func (c *Command) GetHandlers() []command.Handler {
 		cmdutil.NewCommandHandler(CommandName, RotateDIDCommandMethod, c.RotateDID),
 		cmdutil.NewCommandHandler(CommandName, CreateV2CommandMethod, c.CreateConnectionV2),
 		cmdutil.NewCommandHandler(CommandName, SetToV2CommandMethod, c.SetConnectionToDIDCommV2),
+		cmdutil.NewCommandHandler(CommandName, UpdateTheirDIDForConnectionCommandMethod, c.UpdateTheirDIDForConnection),
 	}
 }
 
@@ -240,6 +244,36 @@ func (c *Command) rotateDID(rw io.Writer, request *RotateDIDRequest) command.Err
 		logutil.CreateKeyValueString(connectionIDString, request.ID),
 		logutil.CreateKeyValueString(newDIDString, request.NewDID),
 	)
+
+	return nil
+}
+
+func (c *Command) UpdateTheirDIDForConnection(rw io.Writer, req io.Reader) command.Error {
+	var request UpateTheirDIDRequest
+
+	err := json.NewDecoder(req).Decode(&request)
+	if err != nil {
+		logutil.LogInfo(logger, CommandName, UpdateTheirDIDForConnectionCommandMethod, err.Error())
+		return command.NewValidationError(InvalidRequestErrorCode, err)
+	}
+
+	if request.ConnectionID == "" {
+		logutil.LogDebug(logger, CommandName, UpdateTheirDIDForConnectionCommandMethod, errEmptyConnID)
+		return command.NewValidationError(InvalidRequestErrorCode, fmt.Errorf(errEmptyConnID))
+	}
+
+	if request.TheirDID == "" {
+		logutil.LogDebug(logger, CommandName, UpdateTheirDIDForConnectionCommandMethod, errEmptyTheirDID)
+		return command.NewValidationError(InvalidRequestErrorCode, fmt.Errorf(errEmptyTheirDID))
+	}
+
+	err = c.client.UpdateTheirDIDForConnection(request.ConnectionID, request.TheirDID)
+	if err != nil {
+		logutil.LogInfo(logger, CommandName, UpdateTheirDIDForConnectionCommandMethod, err.Error())
+		return command.NewExecuteError(UpdateTheirDIDErrorCode, err)
+	}
+
+	command.WriteNillableResponse(rw, &IDMessage{}, logger)
 
 	return nil
 }

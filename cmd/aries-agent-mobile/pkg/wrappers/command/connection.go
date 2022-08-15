@@ -43,3 +43,19 @@ func (i *Connection) CreateConnectionV2(request []byte) *models.ResponseEnvelope
 
 	return &models.ResponseEnvelope{Payload: response}
 }
+
+// UpdateTheirDIDForConnection updates TheirDID for the connection ID
+func (i *Connection) UpdateTheirDIDForConnection(request []byte) *models.ResponseEnvelope {
+	args := cmdconnection.UpateTheirDIDRequest{}
+
+	if err := json.Unmarshal(request, &args); err != nil {
+		return &models.ResponseEnvelope{Error: &models.CommandError{Message: err.Error()}}
+	}
+
+	response, cmdErr := exec(i.handlers[cmdconnection.UpdateTheirDIDForConnectionCommandMethod], args)
+	if cmdErr != nil {
+		return &models.ResponseEnvelope{Error: cmdErr}
+	}
+
+	return &models.ResponseEnvelope{Payload: response}
+}

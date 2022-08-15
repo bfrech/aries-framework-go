@@ -32,3 +32,9 @@ type CreateConnectionRequest struct {
 type IDMessage struct {
 	ConnectionID string `json:"id"`
 }
+
+// UpateTheirDIDRequest request to update the connection entry.
+type UpateTheirDIDRequest struct {
+	TheirDID     string `json:"their_did"`
+	ConnectionID string `json:"id"`
+}
