@@ -82,12 +82,12 @@ func NewAries(opts *config.Options) (*Aries, error) {
 	}
 
 	notifications := make(chan notifier.NotificationPayload)
-	notifier := notifier.NewNotifier(notifications)
+	mobileNotifier := notifier.NewNotifier(notifications)
 
 	// Mobile Message registration
 	mobileMessage, err := mobilemsg.NewMessageService("mobilemessage", func(message mobilemsg.Message, ctx service.DIDCommContext) error {
 		content := fmt.Sprintf(`{"from": "%s", "to": "%s" ,"content": "%s" }`, ctx.TheirDID(), message.To, message.Body.Content)
-		err := notifier.Notify(message.Goal, []byte(content))
+		err := mobileNotifier.Notify(message.Goal, []byte(content))
 		if err != nil {
 			return err
 		}
@@ -103,7 +103,7 @@ func NewAries(opts *config.Options) (*Aries, error) {
 	}
 
 	commandHandlers, err := controller.GetCommandHandlers(ctx,
-		controller.WithNotifier(notifier),
+		controller.WithNotifier(mobileNotifier),
 		controller.WithAutoAccept(opts.AutoAccept),
 		controller.WithMessageHandler(opts.MsgHandler),
 	)
@@ -341,7 +341,7 @@ func (a *Aries) UnregisterHandler(id string) {
 	}
 }
 
-// GetIntroduceController returns an Introduce instance.
+// GetIntroduceController returns a IntroduceController instance.
 func (a *Aries) GetIntroduceController() (api.IntroduceController, error) {
 	handlers, ok := a.handlers[introduce.CommandName]
 	if !ok {
