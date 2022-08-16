@@ -11,6 +11,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/btcsuite/btcutil/base58"
 	"github.com/hyperledger/aries-framework-go/pkg/doc/util/kmsdidkey"
 	"github.com/hyperledger/aries-framework-go/pkg/vdr/fingerprint"
 	"io"
@@ -150,7 +151,7 @@ func (o *Command) CreateKeyWithKeyDidFingerprint(rw io.Writer, req io.Reader) co
 
 	command.WriteNillableResponse(rw, &CreateKeyWithKeyDIDResponse{
 		KeyID:     keyID,
-		PublicKey: base64.RawURLEncoding.EncodeToString(pubKeyBytes),
+		PublicKey: base58.Encode(pubKeyBytes),
 		KeyDID:    didKey,
 	}, logger)
 
