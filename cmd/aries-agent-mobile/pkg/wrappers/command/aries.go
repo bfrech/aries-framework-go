@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/command/connection"
 	"github.com/hyperledger/aries-framework-go/pkg/didcomm/common/service"
-	"github.com/hyperledger/aries-framework-go/pkg/didcomm/messaging/service/basic"
+	"github.com/hyperledger/aries-framework-go/pkg/didcomm/messaging/service/mobilemsg"
 	"net/http"
 	"strings"
 	"sync"
@@ -84,22 +84,22 @@ func NewAries(opts *config.Options) (*Aries, error) {
 	notifications := make(chan notifier.NotificationPayload)
 	notifier := notifier.NewNotifier(notifications)
 
-	// Basic Message registration
-	basicMessage, err := basic.NewMessageService("basicmessage", func(message basic.Message, ctx service.DIDCommContext) error {
-		content := fmt.Sprintf(`{"message": "%s" }`, message.Content)
-		err := notifier.Notify("basicmessage", []byte(content))
+	// Mobile Message registration
+	mobileMessage, err := mobilemsg.NewMessageService("mobilemessage", func(message mobilemsg.Message, ctx service.DIDCommContext) error {
+		content := fmt.Sprintf(`{"from": "%s", "to": "%s" ,"content": "%s" }`, ctx.TheirDID(), message.To, message.Body.Content)
+		err := notifier.Notify(message.Goal, []byte(content))
 		if err != nil {
 			return err
 		}
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create basic message service: %w", err)
+		return nil, fmt.Errorf("failed to create mobile message service: %w", err)
 	}
 
-	err = opts.MsgHandler.Register(basicMessage)
+	err = opts.MsgHandler.Register(mobileMessage)
 	if err != nil {
-		return nil, fmt.Errorf("failed to register basic message service: %w", err)
+		return nil, fmt.Errorf("failed to register mobile message service: %w", err)
 	}
 
 	commandHandlers, err := controller.GetCommandHandlers(ctx,
