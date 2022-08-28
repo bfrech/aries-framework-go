@@ -9,7 +9,7 @@ package storage
 
 import (
 	"encoding/json"
-	"errors"
+	_ "errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -321,6 +321,10 @@ type iterator struct {
 	mobileBindingIterator api.Iterator
 }
 
+func (i *iterator) TotalItems() (int, error) {
+	return -1, nil
+}
+
 func (i *iterator) Next() (bool, error) {
 	next, err := i.mobileBindingIterator.Next()
 	if err != nil {
@@ -362,10 +366,6 @@ func (i *iterator) Tags() ([]spi.Tag, error) {
 	}
 
 	return tags, nil
-}
-
-func (i *iterator) TotalItems() (int, error) {
-	return -1, errors.New("not implemented")
 }
 
 func (i *iterator) Close() error {
