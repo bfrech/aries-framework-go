@@ -86,8 +86,8 @@ func NewAries(opts *config.Options) (*Aries, error) {
 
 	// Mobile Message registration
 	mobileMessage, err := mobilemsg.NewMessageService("mobilemessage", func(message mobilemsg.Message, ctx service.DIDCommContext) error {
-		content := fmt.Sprintf(`{"from": "%s", "to": "%s" ,"content": "%s", "created_time": "%s"}`,
-			ctx.TheirDID(), ctx.MyDID(), message.Body.Content, message.CreatedTime)
+		content := fmt.Sprintf(`{"from": "%s", "to": "%s" ,"content": "%s", "created_time": "%s", "id": "%s"}`,
+			ctx.TheirDID(), ctx.MyDID(), message.Body.Content, message.CreatedTime, message.ID)
 		err := mobileNotifier.Notify(message.Goal, []byte(content))
 		if err != nil {
 			return err
