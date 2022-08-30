@@ -12,10 +12,18 @@ require (
 	github.com/hyperledger/aries-framework-go/component/storageutil v0.0.0-20220322085443-50e8f9bd208b
 	github.com/hyperledger/aries-framework-go/spi v0.0.0-20220606124520-53422361c38c
 	github.com/hyperledger/aries-framework-go/test/component v0.0.0-20220428211718-66cc046674a1
-	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/piprate/json-gold v0.4.1
 	github.com/stretchr/testify v1.7.2
 	nhooyr.io/websocket v1.8.3
+)
+
+require (
+	github.com/hyperledger/ursa-wrapper-go v0.3.1 // indirect
+	github.com/kr/pretty v0.2.1 // indirect
+	golang.org/x/mobile v0.0.0-20220722155234-aaac322e2105 // indirect
+	golang.org/x/mod v0.4.2 // indirect
+	golang.org/x/tools v0.1.8-0.20211022200916-316ba0b74098 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 )
 
 require (
@@ -25,7 +33,7 @@ require (
 	github.com/bluele/gcache v0.0.0-20190518031135-bc40bd653833 // indirect
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
-	github.com/cenkalti/backoff/v4 v4.0.2 // indirect
+	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -33,14 +41,14 @@ require (
 	github.com/google/tink/go v1.6.1 // indirect
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/hyperledger/aries-framework-go/component/storage/edv v0.0.0-20220606124520-53422361c38c // indirect
-	github.com/hyperledger/ursa-wrapper-go v0.3.1 // indirect
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a // indirect
 	github.com/kawamuray/jsonpath v0.0.0-20201211160320-7483bafabd7e // indirect
 	github.com/kilic/bls12-381 v0.1.1-0.20210503002446-7b7597926c69 // indirect
 	github.com/klauspost/compress v1.10.0 // indirect
+	github.com/mattn/go-sqlite3 v1.14.14
 	github.com/minio/blake2b-simd v0.0.0-20160723061019-3f5f724cb5b1 // indirect
 	github.com/minio/sha256-simd v0.1.1 // indirect
-	github.com/mitchellh/mapstructure v1.1.2 // indirect
+	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-base32 v0.0.4 // indirect
 	github.com/multiformats/go-base36 v0.1.0 // indirect
