@@ -88,7 +88,7 @@ func (d *DID) String() string {
 // See https://w3c.github.io/did-core/#generic-did-syntax.
 func Parse(did string) (*DID, error) {
 	// I could not find a good ABNF parser :(
-	const idchar = `a-zA-Z0-9-_\.#`
+	const idchar = `a-zA-Z0-9-_\.`
 	regex := fmt.Sprintf(`^did:[a-z0-9]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, idchar, idchar)
 
 	r, err := regexp.Compile(regex)
