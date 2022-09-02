@@ -13,6 +13,7 @@ import (
 	"crypto/rand"
 	"testing"
 
+	"github.com/btcsuite/btcutil/base58"
 	"github.com/stretchr/testify/require"
 
 	"github.com/hyperledger/aries-framework-go/pkg/common/model"
@@ -21,8 +22,8 @@ import (
 	"github.com/hyperledger/aries-framework-go/pkg/framework/aries/api/vdr"
 	"github.com/hyperledger/aries-framework-go/pkg/kms"
 	"github.com/hyperledger/aries-framework-go/pkg/kms/localkms"
-	mockprotocol "github.com/hyperledger/aries-framework-go/pkg/mock/didcomm/protocol"
 	"github.com/hyperledger/aries-framework-go/pkg/mock/storage"
+	"github.com/hyperledger/aries-framework-go/pkg/secretlock"
 	"github.com/hyperledger/aries-framework-go/pkg/secretlock/noop"
 	"github.com/hyperledger/aries-framework-go/pkg/vdr/fingerprint"
 	spi "github.com/hyperledger/aries-framework-go/spi/storage"
@@ -160,6 +161,23 @@ func TestBuild(t *testing.T) {
 			result.DIDDocument.Service[0].RecipientKeys[0])
 	})
 
+	t.Run("inlined recipient keys for legacy didcomm", func(t *testing.T) {
+		expected := getSigningKey()
+		c, err := New(sProvider)
+		require.NoError(t, err)
+
+		result, err := c.Create(
+			&did.Doc{VerificationMethod: []did.VerificationMethod{expected}, Service: []did.Service{{
+				Type: vdr.LegacyServiceType,
+			}}})
+
+		require.NoError(t, err)
+		require.NotEmpty(t, result.DIDDocument.Service)
+		require.NotEmpty(t, result.DIDDocument.Service[0].RecipientKeys)
+		require.Equal(t, base58.Encode(expected.Value),
+			result.DIDDocument.Service[0].RecipientKeys[0])
+	})
+
 	t.Run("create using Service with empty type and bad DefaultServiceType opt (not string)", func(t *testing.T) {
 		expected, keyAgreement := getSigningAndKeyAgreementKey(t, false, km)
 		c, err := New(sProvider)
@@ -227,7 +245,7 @@ func TestBuild(t *testing.T) {
 		require.EqualError(t, err, "create peer DID : defaultServiceEndpoint not string")
 	})
 
-	serviceTypes := []string{vdr.DIDCommServiceType, vdr.DIDCommV2ServiceType}
+	serviceTypes := []string{vdr.DIDCommServiceType, vdr.DIDCommV2ServiceType, vdr.LegacyServiceType}
 
 	for _, svcType := range serviceTypes {
 		t.Run("test success - create using Service with P-256 keys as jsonWebKey2020 with service type: "+svcType,
@@ -249,6 +267,10 @@ func TestBuild(t *testing.T) {
 
 				if svcType == vdr.DIDCommV2ServiceType {
 					expectedKey = keyAgreement.VerificationMethod.ID
+				}
+
+				if svcType == vdr.LegacyServiceType {
+					expectedKey = base58.Encode(expected.Value)
 				}
 
 				require.NoError(t, err)
@@ -311,12 +333,28 @@ func getSigningAndKeyAgreementKey(t *testing.T, useJWK bool, km kms.KeyManager) 
 	}
 }
 
+type kmsProvider struct {
+	store             kms.Store
+	secretLockService secretlock.Service
+}
+
+func (k *kmsProvider) StorageProvider() kms.Store {
+	return k.store
+}
+
+func (k *kmsProvider) SecretLock() secretlock.Service {
+	return k.secretLockService
+}
+
 func newKMS(t *testing.T, store spi.Provider) kms.KeyManager {
 	t.Helper()
 
-	kmsProv := &mockprotocol.MockProvider{
-		StoreProvider: store,
-		CustomLock:    &noop.NoLock{},
+	kmsStore, err := kms.NewAriesProviderWrapper(store)
+	require.NoError(t, err)
+
+	kmsProv := &kmsProvider{
+		store:             kmsStore,
+		secretLockService: &noop.NoLock{},
 	}
 
 	customKMS, err := localkms.New("local-lock://primary/test/", kmsProv)

@@ -1,5 +1,6 @@
 /*
 Copyright SecureKey Technologies Inc. All Rights Reserved.
+Copyright Avast Software. All Rights Reserved.
 
 SPDX-License-Identifier: Apache-2.0
 */
@@ -391,7 +392,7 @@ func (c *DidComm) ProposeCredential(authToken string, invitation *GenericInvitat
 }
 
 // RequestCredential sends request credential message from wallet to issuer and
-// optionally waits for credential fulfillment.
+// optionally waits for credential response.
 // https://w3c-ccg.github.io/universal-wallet-interop-spec/#requestcredential
 //
 // Currently Supporting : 0453-issueCredentialV2
@@ -439,7 +440,7 @@ func (c *DidComm) RequestCredential(authToken, thID string, options ...ConcludeI
 		return nil, err
 	}
 
-	// wait for credential fulfillment.
+	// wait for credential response.
 	if opts.waitForDone {
 		statusCh := make(chan service.StateMsg, msgEventBufferSize)
 
@@ -547,10 +548,10 @@ func waitForConnect(ctx context.Context, didStateMsgs chan service.StateMsg, con
 				continue
 			}
 
-			var event didexchangeSvc.Event
+			var event model.Event
 
 			switch p := msg.Properties.(type) {
-			case didexchangeSvc.Event:
+			case model.Event:
 				event = p
 			default:
 				logger.Warnf("failed to cast didexchange event properties")

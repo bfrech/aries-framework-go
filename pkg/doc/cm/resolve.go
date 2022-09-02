@@ -20,20 +20,20 @@ import (
 
 // ResolvedProperty contains resolved result for each resolved property.
 type ResolvedProperty struct {
-	Schema Schema      `json:"schema,omitempty"`
-	Label  string      `json:"label,omitempty"`
-	Value  interface{} `json:"value,omitempty"`
+	Schema Schema      `json:"schema"`
+	Label  string      `json:"label"`
+	Value  interface{} `json:"value"`
 }
 
-// ResolvedDescriptor typically represents results of resolving manifests by credential fulfillment.
+// ResolvedDescriptor typically represents results of resolving manifests by credential response.
 // Typically represents a DataDisplayDescriptor that's had its various "template" fields resolved
 // into concrete values based on a Verifiable Credential.
 type ResolvedDescriptor struct {
-	DescriptorID string              `json:"descriptor_id,omitempty"`
+	DescriptorID string              `json:"descriptor_id"`
 	Title        string              `json:"title,omitempty"`
 	Subtitle     string              `json:"subtitle,omitempty"`
 	Description  string              `json:"description,omitempty"`
-	Styles       Styles              `json:"styles,omitempty"`
+	Styles       *Styles             `json:"styles,omitempty"`
 	Properties   []*ResolvedProperty `json:"properties,omitempty"`
 }
 
@@ -60,21 +60,21 @@ func RawCredentialToResolve(raw json.RawMessage) CredentialToResolveOption {
 	}
 }
 
-// ResolveFulfillment resolves given credential fulfillment and returns results.
-// Currently supports only 'ldp_vc' format of fulfillment credentials.
-func (cm *CredentialManifest) ResolveFulfillment(fulfillment *verifiable.Presentation) ([]*ResolvedDescriptor, error) { //nolint:funlen,gocyclo,lll
+// ResolveResponse resolves given credential response and returns results.
+// Currently supports only 'ldp_vc' format of response credentials.
+func (cm *CredentialManifest) ResolveResponse(response *verifiable.Presentation) ([]*ResolvedDescriptor, error) { //nolint:funlen,gocyclo,lll
 	var results []*ResolvedDescriptor
 
-	credentialFulfillmentMap, ok := lookUpMap(fulfillment.CustomFields, "credential_fulfillment")
+	credentialResponseMap, ok := lookUpMap(response.CustomFields, "credential_response")
 	if !ok {
-		return nil, errors.New("invalid credential fulfillment")
+		return nil, errors.New("invalid credential response")
 	}
 
-	if manifestID, k := credentialFulfillmentMap["manifest_id"]; !k || cm.ID != manifestID {
-		return nil, errors.New("credential fulfillment not matching")
+	if manifestID, k := credentialResponseMap["manifest_id"]; !k || cm.ID != manifestID {
+		return nil, errors.New("credential response not matching")
 	}
 
-	descriptorMaps, ok := lookUpArray(credentialFulfillmentMap, "descriptor_map")
+	descriptorMaps, ok := lookUpArray(credentialResponseMap, "descriptor_map")
 	if !ok {
 		return nil, errors.New("invalid descriptor map")
 	}
@@ -87,7 +87,7 @@ func (cm *CredentialManifest) ResolveFulfillment(fulfillment *verifiable.Present
 
 	builder := gval.Full(jsonpath.PlaceholderExtension())
 
-	vpBits, err := fulfillment.MarshalJSON()
+	vpBits, err := response.MarshalJSON()
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal vp: %w", err)
 	}
@@ -206,17 +206,17 @@ func resolveOutputDescriptor(outputDescriptor *OutputDescriptor,
 
 func resolveStaticDisplayMappingObjects(outputDescriptor *OutputDescriptor,
 	vc map[string]interface{}) (staticDisplayMappingObjects, error) {
-	title, err := resolveDisplayMappingObject(&outputDescriptor.Display.Title, vc)
+	title, err := resolveDisplayMappingObject(outputDescriptor.Display.Title, vc)
 	if err != nil {
 		return staticDisplayMappingObjects{}, fmt.Errorf("failed to resolve title display mapping object: %w", err)
 	}
 
-	subtitle, err := resolveDisplayMappingObject(&outputDescriptor.Display.Subtitle, vc)
+	subtitle, err := resolveDisplayMappingObject(outputDescriptor.Display.Subtitle, vc)
 	if err != nil {
 		return staticDisplayMappingObjects{}, fmt.Errorf("failed to resolve subtitle display mapping object: %w", err)
 	}
 
-	description, err := resolveDisplayMappingObject(&outputDescriptor.Display.Description, vc)
+	description, err := resolveDisplayMappingObject(outputDescriptor.Display.Description, vc)
 	if err != nil {
 		return staticDisplayMappingObjects{}, fmt.Errorf("failed to resolve description display mapping object: %w", err)
 	}
@@ -228,7 +228,7 @@ func resolveStaticDisplayMappingObjects(outputDescriptor *OutputDescriptor,
 	}, nil
 }
 
-func resolveDescriptorProperties(properties []LabeledDisplayMappingObject,
+func resolveDescriptorProperties(properties []*LabeledDisplayMappingObject,
 	vc map[string]interface{}) ([]*ResolvedProperty, error) {
 	var resolvedProperties []*ResolvedProperty
 

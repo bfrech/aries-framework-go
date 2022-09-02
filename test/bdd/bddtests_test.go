@@ -26,7 +26,9 @@ import (
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/didresolver"
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/introduce"
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/issuecredential"
+	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/jwt"
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/ld"
+	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/legacyconnection"
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/mediator"
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/messaging"
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/outofband"
@@ -35,6 +37,7 @@ import (
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/vdr"
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/verifiable"
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/waci"
+	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/walletjsonld"
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/webkms"
 )
 
@@ -210,10 +213,13 @@ func features() []feature {
 		rfc0593.NewRestSDKSteps(),
 		ld.NewLDControllerSteps(),
 		ld.NewSDKSteps(),
+		jwt.NewJWTSDKSteps(),
 		connection.NewSDKSteps(),
 		connection.NewControllerSteps(),
 		webkms.NewCryptoSDKSteps(),
 		waci.NewIssuanceDIDCommV1SDKSteps(),
 		waci.NewIssuanceDIDCommV2SDKSteps(),
+		walletjsonld.NewSDKSteps(),
+		legacyconnection.NewLegacyConnectionControllerSteps(),
 	}
 }

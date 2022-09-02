@@ -27,13 +27,14 @@ import (
 	"github.com/hyperledger/aries-framework-go/pkg/doc/presexch"
 	"github.com/hyperledger/aries-framework-go/pkg/doc/verifiable"
 	"github.com/hyperledger/aries-framework-go/test/bdd/pkg/context"
+	bddverifiable "github.com/hyperledger/aries-framework-go/test/bdd/pkg/verifiable"
 )
 
 var (
 	//go:embed testdata/credential_manifest_drivers_license.json
 	credentialManifestDriversLicense []byte //nolint:gochecknoglobals
-	//go:embed testdata/credential_fulfillment_drivers_license.json
-	credentialFulfillmentDriversLicense []byte //nolint:gochecknoglobals
+	//go:embed testdata/credential_response_drivers_license.json
+	credentialResponseDriversLicense []byte //nolint:gochecknoglobals
 	//go:embed testdata/vc_drivers_license_without_proof.json
 	vcDriversLicenseWithoutProof []byte //nolint:gochecknoglobals
 	//go:embed testdata/vc_drivers_license.json
@@ -89,7 +90,7 @@ func (i *IssuanceSDKDIDCommV2Steps) RegisterSteps(suite *godog.Suite) {
 		i.acceptCredentialApplication)
 	suite.Step(`^"([^"]*)" accepts the credential$`, i.acceptCredential)
 	suite.Step(`^Holder checks that the expected credential was received in a Credential `+
-		`Fulfillment attachment$`, i.checkCredential)
+		`Response attachment$`, i.checkCredential)
 }
 
 func (i *IssuanceSDKDIDCommV2Steps) createOOBV2WithStreamlinedVCGoalCode(issuerName string) error {
@@ -244,7 +245,7 @@ func (i *IssuanceSDKDIDCommV2Steps) acceptCredentialApplication(issuerName strin
 		return fmt.Errorf("failed to marshal credential_application object: %w", err)
 	}
 
-	documentLoader, err := createDocumentLoader()
+	documentLoader, err := bddverifiable.CreateDocumentLoader()
 	if err != nil {
 		return err
 	}
@@ -293,12 +294,12 @@ func (i *IssuanceSDKDIDCommV2Steps) acceptCredential(holderName string) error {
 }
 
 func (i *IssuanceSDKDIDCommV2Steps) checkCredential() error {
-	credentialFulfillmentAttachment, err := i.getCredentialFulfillmentAttachment()
+	credentialResponseAttachment, err := i.getCredentialResponseAttachment()
 	if err != nil {
 		return err
 	}
 
-	vc, err := getVCFromCredentialFulfillmentAttachment(&credentialFulfillmentAttachment)
+	vc, err := getVCFromCredentialResponseAttachment(&credentialResponseAttachment)
 	if err != nil {
 		return err
 	}
@@ -412,25 +413,25 @@ func (i *IssuanceSDKDIDCommV2Steps) checkAttachments(attachmentsFromOfferMsg []d
 			expectedCredentialManifestID, credentialManifest.ID)
 	}
 
-	// The Credential Fulfillment we receive from the issuer acts as a preview for the credentials we eventually
+	// The Credential Response we receive from the issuer acts as a preview for the credentials we eventually
 	// wish to receive.
-	credentialFulfillment, err := getCredentialFulfillmentFromAttachment(&attachmentsFromOfferMsg[1])
+	credentialResponse, err := getCredentialResponseFromAttachment(&attachmentsFromOfferMsg[1])
 	if err != nil {
 		return err
 	}
 
-	if credentialFulfillment.ManifestID != expectedCredentialManifestID {
-		return fmt.Errorf("expected credential fulfillment's manifest ID to be %s, but got %s instead",
-			expectedCredentialManifestID, credentialFulfillment.ManifestID)
+	if credentialResponse.ManifestID != expectedCredentialManifestID {
+		return fmt.Errorf("expected credential response's manifest ID to be %s, but got %s instead",
+			expectedCredentialManifestID, credentialResponse.ManifestID)
 	}
 
-	documentLoader, err := createDocumentLoader()
+	documentLoader, err := bddverifiable.CreateDocumentLoader()
 	if err != nil {
 		return err
 	}
 
 	// These VCs are only previews - they lack proofs.
-	vcs, err := credentialFulfillment.ResolveDescriptorMaps(attachmentsFromOfferMsg[1].Data.JSON,
+	vcs, err := credentialResponse.ResolveDescriptorMaps(attachmentsFromOfferMsg[1].Data.JSON,
 		verifiable.WithJSONLDDocumentLoader(documentLoader))
 	if err != nil {
 		return err
@@ -447,7 +448,7 @@ func (i *IssuanceSDKDIDCommV2Steps) checkAttachments(attachmentsFromOfferMsg []d
 	return nil
 }
 
-func (i *IssuanceSDKDIDCommV2Steps) getCredentialFulfillmentAttachment() (decorator.GenericAttachment, error) {
+func (i *IssuanceSDKDIDCommV2Steps) getCredentialResponseAttachment() (decorator.GenericAttachment, error) {
 	for {
 		select {
 		case msg := <-i.holderEvent:

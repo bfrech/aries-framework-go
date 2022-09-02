@@ -14,16 +14,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/hyperledger/aries-framework-go/component/storageutil/mem"
 	issuecredentialclient "github.com/hyperledger/aries-framework-go/pkg/client/issuecredential"
 	"github.com/hyperledger/aries-framework-go/pkg/didcomm/common/service"
 	"github.com/hyperledger/aries-framework-go/pkg/didcomm/protocol/decorator"
 	"github.com/hyperledger/aries-framework-go/pkg/doc/cm"
-	"github.com/hyperledger/aries-framework-go/pkg/doc/ld"
 	"github.com/hyperledger/aries-framework-go/pkg/doc/presexch"
 	"github.com/hyperledger/aries-framework-go/pkg/doc/verifiable"
-	ldstore "github.com/hyperledger/aries-framework-go/pkg/store/ld"
-	bddldcontext "github.com/hyperledger/aries-framework-go/test/bdd/pkg/ldcontext"
+	bddverifiable "github.com/hyperledger/aries-framework-go/test/bdd/pkg/verifiable"
 )
 
 const expectedVCID = "https://eu.com/claims/DriversLicense"
@@ -139,14 +136,14 @@ func generateOfferCredentialMsg(msgType string) (*issuecredentialclient.OfferCre
 		return nil, err
 	}
 
-	// A Credential Fulfillment attachment is sent here as a preview of the VC so the Holder can see what
+	// A Credential Response attachment is sent here as a preview of the VC so the Holder can see what
 	// the credential will look like.
-	credentialFulfillmentAttachment, err := generateCredentialFulfillmentAttachmentWithoutProof()
+	credentialResponseAttachment, err := generateCredentialResponseAttachmentWithoutProof()
 	if err != nil {
 		return nil, err
 	}
 
-	attachments := []decorator.GenericAttachment{*credentialManifestAttachment, *credentialFulfillmentAttachment}
+	attachments := []decorator.GenericAttachment{*credentialManifestAttachment, *credentialResponseAttachment}
 
 	offerCredential := issuecredentialclient.OfferCredential{
 		Type:        msgType,
@@ -194,25 +191,25 @@ func generateCredentialManifest() (*cm.CredentialManifest, error) {
 	return &credentialManifest, nil
 }
 
-func generateCredentialFulfillmentAttachmentWithoutProof() (*decorator.GenericAttachment, error) {
-	var credentialFulfillment cm.CredentialFulfillment
+func generateCredentialResponseAttachmentWithoutProof() (*decorator.GenericAttachment, error) {
+	var credentialResponse cm.CredentialResponse
 
-	err := json.Unmarshal(credentialFulfillmentDriversLicense, &credentialFulfillment)
+	err := json.Unmarshal(credentialResponseDriversLicense, &credentialResponse)
 	if err != nil {
 		return nil, err
 	}
 
 	cxt := []string{
 		"https://www.w3.org/2018/credentials/v1",
-		cm.CredentialFulfillmentPresentationContext,
+		cm.CredentialResponsePresentationContext,
 	}
 
 	types := []string{
 		"VerifiablePresentation",
-		"CredentialFulfillment",
+		"CredentialResponse",
 	}
 
-	documentLoader, err := createDocumentLoader()
+	documentLoader, err := bddverifiable.CreateDocumentLoader()
 	if err != nil {
 		return nil, err
 	}
@@ -226,20 +223,20 @@ func generateCredentialFulfillmentAttachmentWithoutProof() (*decorator.GenericAt
 	verifiableCredentials := []*verifiable.Credential{vcPreview}
 
 	attachmentData := map[string]interface{}{
-		"@context":               cxt,
-		"type":                   types,
-		"credential_fulfillment": credentialFulfillment,
-		"verifiableCredential":   verifiableCredentials,
+		"@context":             cxt,
+		"type":                 types,
+		"credential_response":  credentialResponse,
+		"verifiableCredential": verifiableCredentials,
 	}
 
-	credentialFulfillmentAttachment := decorator.GenericAttachment{
+	credentialResponseAttachment := decorator.GenericAttachment{
 		ID:        uuid.New().String(),
 		MediaType: "application/json",
-		Format:    cm.CredentialFulfillmentAttachmentFormat,
+		Format:    cm.CredentialResponseAttachmentFormat,
 		Data:      decorator.AttachmentData{JSON: attachmentData},
 	}
 
-	return &credentialFulfillmentAttachment, nil
+	return &credentialResponseAttachment, nil
 }
 
 func generateRequestCredentialMsg(credentialManifest *cm.CredentialManifest, msgType string) (
@@ -285,7 +282,7 @@ func generateCredentialApplicationAttachment(credentialManifest *cm.CredentialMa
 		return nil, err
 	}
 
-	documentLoader, err := createDocumentLoader()
+	documentLoader, err := bddverifiable.CreateDocumentLoader()
 	if err != nil {
 		return nil, err
 	}
@@ -334,22 +331,22 @@ func generateCredentialApplicationProof() map[string]string {
 func generateIssueCredentialMsg(msgType string) (*issuecredentialclient.IssueCredential, error) {
 	cxt := []string{
 		"https://www.w3.org/2018/credentials/v1",
-		cm.CredentialFulfillmentPresentationContext,
+		cm.CredentialResponsePresentationContext,
 	}
 
 	types := []string{
 		"VerifiablePresentation",
-		"CredentialFulfillment",
+		"CredentialResponse",
 	}
 
-	var credentialFulfillment cm.CredentialFulfillment
+	var credentialResponse cm.CredentialResponse
 
-	err := json.Unmarshal(credentialFulfillmentDriversLicense, &credentialFulfillment)
+	err := json.Unmarshal(credentialResponseDriversLicense, &credentialResponse)
 	if err != nil {
 		return nil, err
 	}
 
-	documentLoader, err := createDocumentLoader()
+	documentLoader, err := bddverifiable.CreateDocumentLoader()
 	if err != nil {
 		return nil, err
 	}
@@ -362,20 +359,20 @@ func generateIssueCredentialMsg(msgType string) (*issuecredentialclient.IssueCre
 
 	verifiableCredentials := []*verifiable.Credential{verifiableCredential}
 
-	proof := generateCredentialFulfillmentProof()
+	proof := generateCredentialResponseProof()
 
 	attachmentData := map[string]interface{}{
-		"@context":               cxt,
-		"type":                   types,
-		"credential_fulfillment": credentialFulfillment,
-		"verifiableCredential":   verifiableCredentials,
-		"proof":                  proof,
+		"@context":             cxt,
+		"type":                 types,
+		"credential_response":  credentialResponse,
+		"verifiableCredential": verifiableCredentials,
+		"proof":                proof,
 	}
 
 	issueCredentialAttachment := decorator.GenericAttachment{
 		ID:        uuid.New().String(),
 		MediaType: "application/json",
-		Format:    cm.CredentialFulfillmentAttachmentFormat,
+		Format:    cm.CredentialResponseAttachmentFormat,
 		Data:      decorator.AttachmentData{JSON: attachmentData},
 	}
 
@@ -390,7 +387,7 @@ func generateIssueCredentialMsg(msgType string) (*issuecredentialclient.IssueCre
 	return &issueCredentialMsg, nil
 }
 
-func generateCredentialFulfillmentProof() map[string]string {
+func generateCredentialResponseProof() map[string]string {
 	return map[string]string{
 		"type": "Ed25519Signature2018",
 		"verificationMethod": "did:orb:EiA3Xmv8A8vUH5lRRZeKakd-cjAxGC2A4aoPDjLysjghow#tMIstfHSzXfBUF" +
@@ -430,67 +427,67 @@ func getCredentialManifestFromAttachment(attachment *decorator.GenericAttachment
 	return &credentialManifest, nil
 }
 
-func getCredentialFulfillmentFromAttachment(attachment *decorator.GenericAttachment) (*cm.CredentialFulfillment,
+func getCredentialResponseFromAttachment(attachment *decorator.GenericAttachment) (*cm.CredentialResponse,
 	error) {
 	attachmentAsMap, ok := attachment.Data.JSON.(map[string]interface{})
 	if !ok {
 		return nil, errors.New("couldn't assert attachment as a map")
 	}
 
-	credentialFulfillmentRaw, ok := attachmentAsMap["credential_fulfillment"]
+	credentialResponseRaw, ok := attachmentAsMap["credential_response"]
 	if !ok {
-		return nil, errors.New("credential_fulfillment object missing from attachment")
+		return nil, errors.New("credential_response object missing from attachment")
 	}
 
-	credentialFulfillmentBytes, err := json.Marshal(credentialFulfillmentRaw)
+	credentialResponseBytes, err := json.Marshal(credentialResponseRaw)
 	if err != nil {
 		return nil, err
 	}
 
-	var credentialFulfillment cm.CredentialFulfillment
+	var credentialResponse cm.CredentialResponse
 
-	// This unmarshal call also triggers the credential fulfillment validation code, which ensures that the
-	// credential fulfillment object is valid under the spec.
-	err = json.Unmarshal(credentialFulfillmentBytes, &credentialFulfillment)
+	// This unmarshal call also triggers the credential response validation code, which ensures that the
+	// credential response object is valid under the spec.
+	err = json.Unmarshal(credentialResponseBytes, &credentialResponse)
 	if err != nil {
 		return nil, err
 	}
 
-	return &credentialFulfillment, nil
+	return &credentialResponse, nil
 }
 
-func getVCFromCredentialFulfillmentAttachment(credentialFulfillmentAttachment *decorator.GenericAttachment) (
+func getVCFromCredentialResponseAttachment(credentialResponseAttachment *decorator.GenericAttachment) (
 	verifiable.Credential, error) {
-	attachmentRaw := credentialFulfillmentAttachment.Data.JSON
+	attachmentRaw := credentialResponseAttachment.Data.JSON
 
 	attachmentAsMap, ok := attachmentRaw.(map[string]interface{})
 	if !ok {
 		return verifiable.Credential{}, errors.New("couldn't assert attachment as a map")
 	}
 
-	credentialFulfillmentRaw, ok := attachmentAsMap["credential_fulfillment"]
+	credentialResponseRaw, ok := attachmentAsMap["credential_response"]
 	if !ok {
-		return verifiable.Credential{}, errors.New("credential_fulfillment object missing from attachment")
+		return verifiable.Credential{}, errors.New("credential_response object missing from attachment")
 	}
 
-	credentialFulfillmentBytes, err := json.Marshal(credentialFulfillmentRaw)
+	credentialResponseBytes, err := json.Marshal(credentialResponseRaw)
 	if err != nil {
 		return verifiable.Credential{}, err
 	}
 
-	var credentialFulfillment cm.CredentialFulfillment
+	var credentialResponse cm.CredentialResponse
 
-	err = json.Unmarshal(credentialFulfillmentBytes, &credentialFulfillment)
+	err = json.Unmarshal(credentialResponseBytes, &credentialResponse)
 	if err != nil {
 		return verifiable.Credential{}, err
 	}
 
-	documentLoader, err := createDocumentLoader()
+	documentLoader, err := bddverifiable.CreateDocumentLoader()
 	if err != nil {
 		return verifiable.Credential{}, err
 	}
 
-	vcs, err := credentialFulfillment.ResolveDescriptorMaps(credentialFulfillmentAttachment.Data.JSON,
+	vcs, err := credentialResponse.ResolveDescriptorMaps(credentialResponseAttachment.Data.JSON,
 		verifiable.WithDisabledProofCheck(), verifiable.WithJSONLDDocumentLoader(documentLoader))
 	if err != nil {
 		return verifiable.Credential{}, err
@@ -501,41 +498,4 @@ func getVCFromCredentialFulfillmentAttachment(credentialFulfillmentAttachment *d
 	}
 
 	return vcs[0], nil
-}
-
-type docLoaderProvider struct {
-	ContextStore        ldstore.ContextStore
-	RemoteProviderStore ldstore.RemoteProviderStore
-}
-
-func (p *docLoaderProvider) JSONLDContextStore() ldstore.ContextStore {
-	return p.ContextStore
-}
-
-func (p *docLoaderProvider) JSONLDRemoteProviderStore() ldstore.RemoteProviderStore {
-	return p.RemoteProviderStore
-}
-
-func createDocumentLoader() (*ld.DocumentLoader, error) {
-	contextStore, err := ldstore.NewContextStore(mem.NewProvider())
-	if err != nil {
-		return nil, err
-	}
-
-	remoteProviderStore, err := ldstore.NewRemoteProviderStore(mem.NewProvider())
-	if err != nil {
-		return nil, err
-	}
-
-	p := &docLoaderProvider{
-		ContextStore:        contextStore,
-		RemoteProviderStore: remoteProviderStore,
-	}
-
-	loader, err := ld.NewDocumentLoader(p, ld.WithExtraContexts(bddldcontext.Extra()...))
-	if err != nil {
-		return nil, err
-	}
-
-	return loader, nil
 }

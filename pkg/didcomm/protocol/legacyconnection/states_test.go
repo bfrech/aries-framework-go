@@ -21,6 +21,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 
+	"github.com/hyperledger/aries-framework-go/component/storageutil/mem"
 	commonmodel "github.com/hyperledger/aries-framework-go/pkg/common/model"
 	"github.com/hyperledger/aries-framework-go/pkg/crypto/tinkcrypto"
 	"github.com/hyperledger/aries-framework-go/pkg/didcomm/common/model"
@@ -441,7 +442,7 @@ func TestCompletedState_Execute(t *testing.T) {
 	invitation, err := createMockInvitation(pubKey, ctx)
 	require.NoError(t, err)
 
-	connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.ID)
+	connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.RecipientKeys[0])
 	require.NoError(t, err)
 
 	response := &Response{
@@ -586,7 +587,7 @@ func TestNewRequestFromInvitation(t *testing.T) {
 	})
 	t.Run("unsuccessful new request from invitation ", func(t *testing.T) {
 		prov := protocol.MockProvider{}
-		customKMS := newKMS(t, prov.StoreProvider)
+		customKMS := newKMS(t, mem.NewProvider())
 
 		ctx := &context{
 			kms:                customKMS,
@@ -624,7 +625,7 @@ func TestNewResponseFromRequest(t *testing.T) {
 		request, err := createRequest(t, ctx)
 		require.NoError(t, err)
 
-		request.Connection.DID = "invalid"
+		request.Connection.DID = "did:invalid"
 		_, connRec, err := ctx.handleInboundRequest(request, &options{}, &connection.Record{})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "resolve did doc from connection request")
@@ -664,6 +665,35 @@ func TestNewResponseFromRequest(t *testing.T) {
 		require.Nil(t, connRec)
 	})
 
+	t.Run("prepare connection signature get invitation", func(t *testing.T) {
+		ctx := getContext(t, &prov, transport.MediaTypeRFC0019EncryptedEnvelope)
+
+		request, err := createRequest(t, ctx)
+		request.Thread.PID = "test"
+
+		require.NoError(t, err)
+		_, connRec, err := ctx.handleInboundRequest(request, &options{}, &connection.Record{})
+		require.Error(t, err)
+
+		require.Contains(t, err.Error(), "get invitation for [invitationID=test]: data not found")
+		require.Nil(t, connRec)
+	})
+
+	t.Run("prepare connection signature get invitation", func(t *testing.T) {
+		invID := randomString()
+		ctx := getContext(t, &prov, transport.MediaTypeRFC0019EncryptedEnvelope)
+
+		request, err := createRequest(t, ctx)
+		request.Thread.PID = invID
+
+		require.NoError(t, err)
+		_, connRec, err := ctx.handleInboundRequest(request, &options{}, &connection.Record{})
+		require.Error(t, err)
+
+		require.Contains(t, err.Error(), fmt.Sprintf("get invitation for [invitationID=%s]: data not found", invID))
+		require.Nil(t, connRec)
+	})
+
 	t.Run("unsuccessful new response from request due to sign error", func(t *testing.T) {
 		connRec, err := connection.NewRecorder(&prov)
 		require.NoError(t, err)
@@ -697,7 +727,7 @@ func TestNewResponseFromRequest(t *testing.T) {
 
 	t.Run("unsuccessful new response from request due to resolve public did from request error", func(t *testing.T) {
 		ctx := &context{vdRegistry: &mockvdr.MockVDRegistry{ResolveErr: errors.New("resolver error")}}
-		request := &Request{Connection: &Connection{DID: "did:sidetree:abc"}}
+		request := &Request{Connection: &Connection{DID: "did:sidetree:abc", DIDDoc: &diddoc.Doc{}}}
 		_, _, err := ctx.handleInboundRequest(request, &options{}, &connection.Record{})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "resolver error")
@@ -735,7 +765,7 @@ func TestPrepareConnectionSignature(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("prepare connection signature", func(t *testing.T) {
-		connectionSignature, err := ctx.prepareConnectionSignature(doc.DIDDocument, invitation.ID)
+		connectionSignature, err := ctx.prepareConnectionSignature(doc.DIDDocument, invitation.RecipientKeys[0])
 		require.NoError(t, err)
 		require.NotNil(t, connectionSignature)
 		sigData, err := base64.URLEncoding.DecodeString(connectionSignature.SignedData)
@@ -755,7 +785,7 @@ func TestPrepareConnectionSignature(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, didConnStore)
 
-		connectionSignature, err := ctx.prepareConnectionSignature(doc.DIDDocument, invitation.ID)
+		connectionSignature, err := ctx.prepareConnectionSignature(doc.DIDDocument, invitation.RecipientKeys[0])
 		require.NoError(t, err)
 		require.NotNil(t, connectionSignature)
 		sigData, err := base64.URLEncoding.DecodeString(connectionSignature.SignedData)
@@ -766,33 +796,12 @@ func TestPrepareConnectionSignature(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, doc.DIDDocument.ID, sigDataConnection.DID)
 	})
-	t.Run("prepare connection signature get invitation", func(t *testing.T) {
-		connectionSignature, err := ctx.prepareConnectionSignature(doc.DIDDocument, "test")
-		require.Error(t, err)
-		require.Contains(t, err.Error(), "get invitation for [invitationID=test]: data not found")
-		require.Nil(t, connectionSignature)
-	})
-	t.Run("prepare connection signature get invitation", func(t *testing.T) {
-		invID := randomString()
-		inv := &Invitation{
-			Type: InvitationMsgType,
-			ID:   invID,
-			DID:  "test",
-		}
-		err := ctx.connectionRecorder.SaveInvitation(invitation.ID, invitation)
-		require.NoError(t, err)
-		connectionSignature, err := ctx.prepareConnectionSignature(doc.DIDDocument, inv.ID)
-		require.Error(t, err)
-		require.Contains(t, err.Error(),
-			fmt.Sprintf("get invitation for [invitationID=%s]: data not found", invID))
-		require.Nil(t, connectionSignature)
-	})
 	t.Run("prepare connection signature error", func(t *testing.T) {
 		ctx2 := ctx
 		ctx2.crypto = &mockcrypto.Crypto{SignErr: errors.New("sign error")}
 		newDIDDoc := mockdiddoc.GetMockDIDDoc(t, false)
 
-		connectionSignature, err := ctx2.prepareConnectionSignature(newDIDDoc, invitation.ID)
+		connectionSignature, err := ctx2.prepareConnectionSignature(newDIDDoc, invitation.RecipientKeys[0])
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "sign error")
 		require.Nil(t, connectionSignature)
@@ -813,7 +822,7 @@ func TestVerifySignature(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("signature verified", func(t *testing.T) {
-		connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.ID)
+		connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.RecipientKeys[0])
 		require.NoError(t, err)
 		con, err := ctx.verifySignature(connectionSignature, invitation.RecipientKeys[0])
 		require.NoError(t, err)
@@ -827,7 +836,7 @@ func TestVerifySignature(t *testing.T) {
 		require.Nil(t, con)
 	})
 	t.Run("decode signature data error", func(t *testing.T) {
-		connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.ID)
+		connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.RecipientKeys[0])
 		require.NoError(t, err)
 
 		connectionSignature.SignedData = "invalid-signed-data"
@@ -837,7 +846,7 @@ func TestVerifySignature(t *testing.T) {
 		require.Nil(t, con)
 	})
 	t.Run("decode signature error", func(t *testing.T) {
-		connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.ID)
+		connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.RecipientKeys[0])
 		require.NoError(t, err)
 
 		connectionSignature.Signature = "invalid-signature"
@@ -847,7 +856,7 @@ func TestVerifySignature(t *testing.T) {
 		require.Nil(t, con)
 	})
 	t.Run("decode verification key error", func(t *testing.T) {
-		connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.ID)
+		connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.RecipientKeys[0])
 		require.NoError(t, err)
 
 		con, err := ctx.verifySignature(connectionSignature, "invalid-key")
@@ -856,7 +865,7 @@ func TestVerifySignature(t *testing.T) {
 		require.Nil(t, con)
 	})
 	t.Run("verify signature error", func(t *testing.T) {
-		connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.ID)
+		connectionSignature, err := ctx.prepareConnectionSignature(newDIDDoc, invitation.RecipientKeys[0])
 		require.NoError(t, err)
 
 		// generate different key and assign it to signature verification key
@@ -968,14 +977,6 @@ func TestResolveDIDDocFromConnection(t *testing.T) {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), "failed to resolve public did")
 			})
-
-		t.Run(fmt.Sprintf("failure - can't parse did with media type profile: %s", mtp), func(t *testing.T) {
-			ctx := getContext(t, &prov, mtp)
-
-			_, err := ctx.resolveDidDocFromConnection(&Connection{DID: "blah blah"})
-			require.Error(t, err)
-			require.Contains(t, err.Error(), "failed to parse did")
-		})
 
 		t.Run(fmt.Sprintf("failure - missing attachment for private did with media type profile: %s", mtp),
 			func(t *testing.T) {
@@ -1214,8 +1215,10 @@ func TestGetDIDDocAndConnection(t *testing.T) {
 		require.NoError(t, err)
 		customKMS := newKMS(t, mockstorage.NewMockStoreProvider())
 		ctx := context{
-			kms:                customKMS,
-			vdRegistry:         &mockvdr.MockVDRegistry{CreateValue: mockdiddoc.GetMockDIDDoc(t, false)},
+			kms: customKMS,
+			vdRegistry: &mockvdr.MockVDRegistry{
+				CreateValue: mockdiddoc.GetLegacyInteropMockDIDDoc(t, "1234567abcdefg", []byte("key")),
+			},
 			connectionRecorder: connRec,
 			routeSvc: &mockroute.MockMediatorSvc{
 				Connections: []string{"xyz"},
@@ -1224,7 +1227,7 @@ func TestGetDIDDocAndConnection(t *testing.T) {
 			keyType:          kms.ED25519Type,
 			keyAgreementType: kms.X25519ECDHKWType,
 		}
-		didDoc, err := ctx.getMyDIDDoc("", []string{"xyz"}, didCommServiceType)
+		didDoc, err := ctx.getMyDIDDoc("", []string{"xyz"}, legacyDIDCommServiceType)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "did doc - add key to the router")
 		require.Nil(t, didDoc)
@@ -1449,7 +1452,12 @@ func createResponse(request *Request, ctx *context) (*Response, error) {
 		return nil, err
 	}
 
-	connectionSignature, err := ctx.prepareConnectionSignature(doc.DIDDocument, request.Thread.PID)
+	verKey, err := ctx.getVerKey(request.Thread.PID)
+	if err != nil {
+		return nil, err
+	}
+
+	connectionSignature, err := ctx.prepareConnectionSignature(doc.DIDDocument, verKey)
 	if err != nil {
 		return nil, err
 	}

@@ -76,6 +76,10 @@ type provable interface {
 	AddLinkedDataProof(context *verifiable.LinkedDataProofContext, jsonldOpts ...jsonld.ProcessorOpts) error
 }
 
+type jwtClaims interface {
+	MarshalJWS(signatureAlg verifiable.JWSAlgorithm, signer verifiable.Signer, keyID string) (string, error)
+}
+
 // Wallet enables access to verifiable credential wallet features.
 type Wallet struct {
 	// ID of wallet content owner
@@ -165,8 +169,13 @@ func CreateDataVaultKeyPairs(userID string, ctx provider, options ...UnlockOptio
 		opt(opts)
 	}
 
+	kmsStore, err := kms.NewAriesProviderWrapper(ctx.StorageProvider())
+	if err != nil {
+		return err
+	}
+
 	// unlock key manager
-	kmsm, err := keyManager().createKeyManager(profile, ctx.StorageProvider(), opts)
+	kmsm, err := keyManager().createKeyManager(profile, kmsStore, opts)
 	if err != nil {
 		return fmt.Errorf("failed to get key manager: %w", err)
 	}
@@ -259,8 +268,13 @@ func (c *Wallet) Open(options ...UnlockOptions) (string, error) {
 		opt(opts)
 	}
 
+	kmsStore, err := kms.NewAriesProviderWrapper(c.storeProvider)
+	if err != nil {
+		return "", err
+	}
+
 	// unlock key manager
-	keyManager, err := keyManager().createKeyManager(c.profile, c.storeProvider, opts)
+	keyManager, err := keyManager().createKeyManager(c.profile, kmsStore, opts)
 	if err != nil {
 		return "", err
 	}
@@ -438,9 +452,24 @@ func (c *Wallet) Issue(authToken string, credential json.RawMessage,
 		return nil, fmt.Errorf("failed to prepare proof: %w", err)
 	}
 
-	err = c.addLinkedDataProof(authToken, vc, options, purpose)
-	if err != nil {
-		return nil, fmt.Errorf("failed to issue credential: %w", err)
+	switch options.ProofFormat {
+	case ExternalJWTProofFormat:
+		claims, e := vc.JWTClaims(false)
+		if e != nil {
+			return nil, fmt.Errorf("failed to generate JWT claims for VC: %w", e)
+		}
+
+		jws, e := c.verifiableClaimsToJWT(authToken, claims, options)
+		if e != nil {
+			return nil, fmt.Errorf("failed to generate JWT VC: %w", e)
+		}
+
+		vc.JWT = jws
+	default: // default case is EmbeddedLDProofFormat
+		err = c.addLinkedDataProof(authToken, vc, options, purpose)
+		if err != nil {
+			return nil, fmt.Errorf("failed to issue credential: %w", err)
+		}
 	}
 
 	return vc, nil
@@ -469,9 +498,26 @@ func (c *Wallet) Prove(authToken string, proofOptions *ProofOptions, credentials
 
 	presentation.Holder = proofOptions.Controller
 
-	err = c.addLinkedDataProof(authToken, presentation, proofOptions, purpose)
-	if err != nil {
-		return nil, fmt.Errorf("failed to prove credentials: %w", err)
+	switch proofOptions.ProofFormat {
+	case ExternalJWTProofFormat:
+		// TODO: look into passing audience identifier
+		//  https://github.com/hyperledger/aries-framework-go/issues/3354
+		claims, e := presentation.JWTClaims(nil, false)
+		if e != nil {
+			return nil, fmt.Errorf("failed to generate JWT claims for VP: %w", e)
+		}
+
+		jws, e := c.verifiableClaimsToJWT(authToken, claims, proofOptions)
+		if e != nil {
+			return nil, fmt.Errorf("failed to generate JWT VP: %w", e)
+		}
+
+		presentation.JWT = jws
+	default: // default case is EmbeddedLDProofFormat
+		err = c.addLinkedDataProof(authToken, presentation, proofOptions, purpose)
+		if err != nil {
+			return nil, fmt.Errorf("failed to prove credentials: %w", err)
+		}
 	}
 
 	return presentation, nil
@@ -551,13 +597,13 @@ func (c *Wallet) CreateKeyPair(authToken string, keyType kms.KeyType) (*KeyPair,
 	}, nil
 }
 
-// ResolveCredentialManifest resolves given credential manifest by credential fulfillment or credential.
+// ResolveCredentialManifest resolves given credential manifest by credential response or credential.
 // Supports: https://identity.foundation/credential-manifest/
 //
 // Args:
 // 		- authToken: authorization for performing operation.
 // 		- manifest: Credential manifest data model in raw format.
-// 		- resolve: options to provide credential fulfillment or credential to resolve.
+// 		- resolve: options to provide credential response or credential to resolve.
 //
 // Returns:
 // 		- list of resolved descriptors.
@@ -578,8 +624,8 @@ func (c *Wallet) ResolveCredentialManifest(authToken string, manifest json.RawMe
 	}
 
 	switch {
-	case len(opts.rawFulfillment) > 0:
-		opts.fulfillment, err = verifiable.ParsePresentation(opts.rawFulfillment,
+	case len(opts.rawResponse) > 0:
+		opts.response, err = verifiable.ParsePresentation(opts.rawResponse,
 			verifiable.WithPresDisabledProofCheck(),
 			verifiable.WithPresJSONLDDocumentLoader(c.jsonldDocumentLoader))
 		if err != nil {
@@ -587,8 +633,8 @@ func (c *Wallet) ResolveCredentialManifest(authToken string, manifest json.RawMe
 		}
 
 		fallthrough
-	case opts.fulfillment != nil:
-		return credentialManifest.ResolveFulfillment(opts.fulfillment)
+	case opts.response != nil:
+		return credentialManifest.ResolveResponse(opts.response)
 	case opts.credentialID != "":
 		opts.rawCredential, err = c.Get(authToken, Credential, opts.credentialID)
 		if err != nil {
@@ -761,6 +807,35 @@ func (c *Wallet) verifyPresentation(authToken string, presentation json.RawMessa
 	return true, nil
 }
 
+func (c *Wallet) verifiableClaimsToJWT(authToken string, claims jwtClaims, options *ProofOptions) (string, error) {
+	s, err := newKMSSigner(authToken, c.walletCrypto, options)
+	if err != nil {
+		return "", fmt.Errorf("initializing signer: %w", err)
+	}
+
+	var alg verifiable.JWSAlgorithm
+
+	switch s.keyType {
+	case kms.ED25519Type:
+		alg = verifiable.EdDSA
+	case kms.ECDSAP256TypeIEEEP1363:
+		alg = verifiable.ECDSASecp256r1
+	case kms.ECDSAP384TypeIEEEP1363:
+		alg = verifiable.ECDSASecp384r1
+	case kms.ECDSAP521TypeIEEEP1363:
+		alg = verifiable.ECDSASecp521r1
+	default:
+		return "", fmt.Errorf("unsupported keytype for JWT")
+	}
+
+	jws, err := claims.MarshalJWS(alg, s, options.VerificationMethod)
+	if err != nil {
+		return "", fmt.Errorf("failed to sign JWS: %w", err)
+	}
+
+	return jws, nil
+}
+
 func (c *Wallet) addLinkedDataProof(authToken string, p provable, opts *ProofOptions,
 	relationship did.VerificationRelationship) error {
 	s, err := newKMSSigner(authToken, c.walletCrypto, opts)
@@ -815,6 +890,10 @@ func (c *Wallet) validateProofOption(authToken string, opts *ProofOptions, metho
 	err = c.validateVerificationMethod(resolvedDoc.DIDDocument, opts, method)
 	if err != nil {
 		return err
+	}
+
+	if opts.ProofFormat == "" {
+		opts.ProofFormat = EmbeddedLDProofFormat
 	}
 
 	if opts.ProofRepresentation == nil {
